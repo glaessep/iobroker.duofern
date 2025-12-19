@@ -27,8 +27,8 @@
         "lint": "eslint src/ --ext .ts",
         "translate": "translate-adapter",
         "version": "node scripts/bump-version.js",
-        "deploy": "npm run build && TARBALL=$(npm pack) && cd /opt/iobroker && node /opt/iobroker/node_modules/.bin/iobroker stop duofern && npm i --force ~/iobroker.duofern/$TARBALL && node /opt/iobroker/node_modules/.bin/iobroker upload duofern && node /opt/iobroker/node_modules/.bin/iobroker start duofern",
-        "deploy-fresh": "npm run build && TARBALL=$(npm pack) && cd /opt/iobroker && node /opt/iobroker/node_modules/.bin/iobroker stop duofern && (node /opt/iobroker/node_modules/.bin/iobroker del duofern || true) && npm i --force ~/iobroker.duofern/$TARBALL && node /opt/iobroker/node_modules/.bin/iobroker upload duofern && node /opt/iobroker/node_modules/.bin/iobroker add duofern 0 && node /opt/iobroker/node_modules/.bin/iobroker start duofern"
+        "deploy": "npm run build && TARBALL=$(npm pack) && IOBROKER_DIR=${IOBROKER_DIR:-/opt/iobroker} && ADAPTER_DIR=${ADAPTER_DIR:-$HOME/iobroker.duofern} && cd \"$IOBROKER_DIR\" && node \"$IOBROKER_DIR/node_modules/.bin/iobroker\" stop duofern && npm i --force \"$ADAPTER_DIR/$TARBALL\" && node \"$IOBROKER_DIR/node_modules/.bin/iobroker\" upload duofern && node \"$IOBROKER_DIR/node_modules/.bin/iobroker\" start duofern",
+        "deploy-fresh": "npm run build && TARBALL=$(npm pack) && IOBROKER_DIR=${IOBROKER_DIR:-/opt/iobroker} && ADAPTER_DIR=${ADAPTER_DIR:-$HOME/iobroker.duofern} && cd \"$IOBROKER_DIR\" && node \"$IOBROKER_DIR/node_modules/.bin/iobroker\" stop duofern && (node \"$IOBROKER_DIR/node_modules/.bin/iobroker\" del duofern || true) && npm i --force \"$ADAPTER_DIR/$TARBALL\" && node \"$IOBROKER_DIR/node_modules/.bin/iobroker\" upload duofern && node \"$IOBROKER_DIR/node_modules/.bin/iobroker\" add duofern 0 && node \"$IOBROKER_DIR/node_modules/.bin/iobroker\" start duofern"
     },
     "dependencies": {
         "@iobroker/adapter-core": "^3.2.3",

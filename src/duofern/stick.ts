@@ -195,6 +195,7 @@ export class DuoFernStick extends EventEmitter {
             // Set timeout to move to next command if no ACK received
             this.queueTimeout = setTimeout(() => {
                 this.emit('log', 'warn', `Timeout waiting for ACK for ${cmd}`);
+                this.queueTimeout = null;
                 this.processQueue(); // Move to next
             }, 5000);
         }

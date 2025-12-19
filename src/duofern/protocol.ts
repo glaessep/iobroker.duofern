@@ -86,6 +86,26 @@ export function buildRemotePair(deviceCode: string): string {
     return Protocol.duoRemotePair.replace("yyyyyy", deviceCode.toUpperCase());
 }
 
+/**
+ * Builds a 22-byte (44-character) command frame for DuoFern devices.
+ *
+ * @param template - 4-byte (8 hex char) command body from Commands object (e.g., Commands.up)
+ * @param replacements - Dynamic values to replace placeholders in template (e.g., {"nn": position})
+ * @param options - Frame parameters: deviceCode (6 hex), stickCode (6 hex), channel (2 hex), suffix (2 hex)
+ * @returns 44-character hex string representing the complete command frame
+ *
+ * @remarks
+ * The function builds a 22-byte frame with this structure:
+ * - Bytes 0-1: Prefix ("0D") and channel
+ * - Bytes 2-5: Command body (4 bytes from template, after replacements)
+ * - Bytes 6-11: Padding (all zeros)
+ * - Bytes 12-14: Stick code (from options.stickCode)
+ * - Bytes 15-17: Device code (from options.deviceCode)
+ * - Bytes 18-21: Suffix (from options.suffix)
+ *
+ * Parameter precedence: options values are used directly; replacements are for
+ * template placeholders only (e.g., position value in "070700nn").
+ */
 export function buildCommand(
     template: string,
     replacements: Record<string, string | number>,
@@ -162,7 +182,10 @@ export function buildBroadcastStatusRequest(): string {
 export function buildRemotePairFrames(deviceCode: string, channel = "01"): string[] {
     const dev = deviceCode.toUpperCase();
     const chan = channel.toUpperCase();
-    const body = Commands.remotePair;
-    const frame = (suffix: string) => ["0D", chan, body, "000000000000", dev, suffix].join("");
+    // Build frames matching the Protocol.duoRemotePair structure:
+    // "0D" + channel + "060100" + 26 zero hex chars + deviceCode (6 hex) + suffix
+    // Total: 44 hex chars (22 bytes)
+    const frame = (suffix: string) =>
+        `0D${chan}06010000000000000000000000000000${dev}${suffix}`;
     return [frame("00"), frame("01")];
 }

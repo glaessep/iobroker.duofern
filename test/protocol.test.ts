@@ -1,5 +1,5 @@
 import * as assert from 'assert';
-import { buildCommand, Commands, Protocol, buildStatusRequest, buildBroadcastStatusRequest, buildSetDongle, buildSetPairs } from '../src/duofern/protocol';
+import { buildCommand, Commands, Protocol, buildStatusRequest, buildSetDongle, buildSetPairs, buildBroadcastStatusRequest, buildRemotePairFrames } from '../src/duofern/protocol';
 
 describe('DuoFern Protocol', () => {
     const STICK_CODE = '6F1234';
@@ -335,6 +335,61 @@ describe('DuoFern Protocol', () => {
             const suffix = cmd.substring(42, 44);
             assert.strictEqual(channel, 'FF', 'Should allow custom channel without stick code');
             assert.strictEqual(suffix, '01', 'Should allow custom suffix without stick code');
+        });
+    });
+
+    describe('buildRemotePairFrames', () => {
+        it('should generate two frames with correct length (44 hex chars)', () => {
+            const frames = buildRemotePairFrames('49ABCD');
+            assert.strictEqual(frames.length, 2, 'Should return two frames');
+            assert.strictEqual(frames[0].length, 44, 'First frame should be 44 hex chars');
+            assert.strictEqual(frames[1].length, 44, 'Second frame should be 44 hex chars');
+        });
+
+        it('should use correct structure for remote pairing', () => {
+            const frames = buildRemotePairFrames('49ABCD', '01');
+            // Frame structure: 0D + channel + command (06010000) + padding (32 zeros) + device + suffix
+            assert.ok(frames[0].startsWith('0D01'), 'Should start with 0D01');
+            assert.ok(frames[0].includes('06010000'), 'Should include remote pair command');
+            assert.ok(frames[0].endsWith('49ABCD00'), 'First frame should end with device code and 00 suffix');
+            assert.ok(frames[1].endsWith('49ABCD01'), 'Second frame should end with device code and 01 suffix');
+        });
+
+        it('should handle custom channels', () => {
+            const frames = buildRemotePairFrames('49ABCD', 'FF');
+            assert.ok(frames[0].startsWith('0DFF'), 'Should use custom channel FF');
+        });
+
+        it('should uppercase device codes', () => {
+            const frames = buildRemotePairFrames('49abcd');
+            assert.ok(frames[0].includes('49ABCD'), 'Should uppercase device code');
+        });
+    });
+
+    describe('buildBroadcastStatusRequest', () => {
+        it('should generate frame with correct length (44 hex chars)', () => {
+            const cmd = buildBroadcastStatusRequest();
+            assert.strictEqual(cmd.length, 44, 'Should be 44 hex chars');
+        });
+
+        it('should use broadcast channel FF and suffix 01', () => {
+            const cmd = buildBroadcastStatusRequest();
+            const channel = cmd.substring(2, 4);
+            const suffix = cmd.substring(42, 44);
+            assert.strictEqual(channel, 'FF', 'Should use broadcast channel FF');
+            assert.strictEqual(suffix, '01', 'Should use suffix 01');
+        });
+
+        it('should include status request command', () => {
+            const cmd = buildBroadcastStatusRequest();
+            const commandBody = cmd.substring(4, 12);
+            assert.strictEqual(commandBody, '0F400000', 'Should use status request command');
+        });
+
+        it('should target all devices (FFFFFF)', () => {
+            const cmd = buildBroadcastStatusRequest();
+            const deviceCode = cmd.substring(36, 42);
+            assert.strictEqual(deviceCode, 'FFFFFF', 'Should target all devices with FFFFFF');
         });
     });
 });

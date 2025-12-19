@@ -22,14 +22,19 @@ const statusGroups: { [key: string]: number[] } = {
     // ... others omitted for now (blinds focus)
 };
 
+/**
+ * Maps logical status identifiers to their possible raw values or labels.
+ *
+ * Note on the "moving" mapping:
+ * The related status bit does not represent direction or whether the device
+ * is currently moving. It is intentionally mapped to "stop" for both bit
+ * values. The actual moving state ("up", "down", "moving", "stop") is
+ * managed entirely by command logic when handling up/down/position
+ * commands, rather than being derived from device status bytes.
+ */
 const statusMapping: { [key: string]: any[] } = {
     "onOff": ["off", "on"],
     "upDown": ["up", "down"],
-    // The "moving" mapping always returns "stop" regardless of the bit value.
-    // This is correct! We manage the actual moving state through command logic,
-    // not through device status parsing. When commands like up/down/position are sent,
-    // we explicitly update the moving reading to "up"/"down"/"moving"/"stop".
-    // The device status only provides a placeholder that always maps to "stop".
     "moving": ["stop", "stop"],
     "motor": ["off", "short(160ms)", "long(480ms)", "individual"],
     "closeT": ["off", "30", "60", "90", "120", "150", "180", "210", "240"],

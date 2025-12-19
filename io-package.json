@@ -128,7 +128,7 @@
     },
     "native": {
         "port": "/dev/serial/by-id/...",
-        "code": "6F1A2B"
+        "code": "6F0000"
     },
     "objects": [],
     "instanceObjects": [

@@ -9,7 +9,17 @@ interface DuoFernAdapterConfig {
     [key: string]: any;
 }
 
-// Device type mapping based on device codes
+/**
+ * Maps DuoFern device type codes (first two hex digits of device code) to human-readable device names.
+ * 
+ * This mapping is defined based on the FHEM DuoFern module and represents known DuoFern device types.
+ * Currently unused but reserved for future features such as:
+ * - Displaying device types in the UI
+ * - Automatic device capability detection
+ * - Device-specific state/command configurations
+ * 
+ * Source: https://wiki.fhem.de/wiki/Rademacher_DuoFern
+ */
 const DEVICE_TYPES: { [key: string]: string } = {
     "40": "RolloTron Standard",
     "41": "RolloTron Comfort Slave",
@@ -24,7 +34,7 @@ const DEVICE_TYPES: { [key: string]: string } = {
     "4C": "Troll Basis",
     "4E": "SX5",
     "61": "RolloTron Comfort Master",
-    "62": "Super Fake Device",
+    "62": "Unspecified device type (62)",
     "65": "Bewegungsmelder",
     "69": "Umweltsensor",
     "70": "Troll Comfort DuoFern",
@@ -100,7 +110,14 @@ export class DuoFernAdapter extends utils.Adapter {
         this.log.info(`Configuration: port=${port}, code=${code}`);
 
         if (!port || !code) {
-            this.log.error("Port or Code not configured. Please configure the adapter.");
+            const missing: string[] = [];
+            if (!port) {
+                missing.push('port');
+            }
+            if (!code) {
+                missing.push('code');
+            }
+            this.log.error(`Configuration error: Missing ${missing.join(' and ')}. Please configure the adapter.`);
             await this.setState('info.connection', false, true);
             return;
         }
@@ -451,13 +468,14 @@ export class DuoFernAdapter extends utils.Adapter {
         }
 
         if (deviceId === 'remotePairByCode') {
-            const codeVal = (state.val as string || '').toUpperCase();
-            if (!/^[0-9A-F]{6}$/.test(codeVal)) {
+            const rawCode = (state.val != null ? String(state.val) : '').trim();
+            if (rawCode.length !== 6 || !/^[0-9a-fA-F]{6}$/.test(rawCode)) {
                 const msg = `Invalid device code for remote pairing: ${state.val}`;
                 this.log.warn(msg);
                 await this.setState('remotePairStatus', msg, true);
                 return;
             }
+            const codeVal = rawCode.toUpperCase();
             if (!this.stick) {
                 const msg = 'Stick not initialized, cannot remote pair';
                 this.log.warn(msg);
@@ -495,8 +513,7 @@ export class DuoFernAdapter extends utils.Adapter {
 
             this.log.debug(`State change: ${id} = ${state.val}`);
 
-            // It's a device command - build replacements with device ID
-            const replacements: any = {};
+            // Build frame options for all device commands
             const frameOpts = {
                 deviceCode: deviceId.toUpperCase(),
                 stickCode: this.config.code.toUpperCase(),
@@ -535,7 +552,7 @@ export class DuoFernAdapter extends utils.Adapter {
             } else if (command === 'stop') {
                 if (state.val === true) {
                     this.log.info(`Sending STOP command to device ${deviceId}`);
-                    const cmd = buildCommand(Commands.stop, replacements, { ...frameOpts, stickCode: '000000' });
+                    const cmd = buildCommand(Commands.stop, {}, frameOpts);
                     this.log.debug(`Built command: ${cmd}`);
                     this.stick.write(cmd);
                     // Update moving state immediately after sending command
@@ -548,12 +565,12 @@ export class DuoFernAdapter extends utils.Adapter {
             } else if (command === 'toggle') {
                 if (state.val === true) {
                     this.log.info(`Sending TOGGLE command to device ${deviceId}`);
-                    const cmd = buildCommand(Commands.toggle, replacements, frameOpts);
+                    const cmd = buildCommand(Commands.toggle, {}, frameOpts);
                     this.log.debug(`Built command: ${cmd}`);
                     this.stick.write(cmd);
                     // Update moving state immediately after sending command
                     const currentPosition = await this.getStateAsync(`${deviceId}.position`);
-                    if (currentPosition && currentPosition.val !== null && currentPosition.val as number > -1) {
+                    if (currentPosition && typeof currentPosition.val === 'number' && currentPosition.val >= 0) {
                         await this.setState(`${deviceId}.moving`, 'moving', true);
                     }
                     // Reset button state after 1 second
@@ -579,47 +596,47 @@ export class DuoFernAdapter extends utils.Adapter {
                 }
             } else if (command === 'sunMode') {
                 this.log.info(`Sending SUN MODE ${state.val ? 'ON' : 'OFF'} command to device ${deviceId}`);
-                const cmd = buildCommand(state.val ? Commands.sunModeOn : Commands.sunModeOff, replacements, frameOpts);
+                const cmd = buildCommand(state.val ? Commands.sunModeOn : Commands.sunModeOff, {}, frameOpts);
                 this.log.debug(`Built command: ${cmd}`);
                 this.stick.write(cmd);
             } else if (command === 'manualMode') {
                 this.log.info(`Sending MANUAL MODE ${state.val ? 'ON' : 'OFF'} command to device ${deviceId}`);
-                const cmd = buildCommand(state.val ? Commands.manualModeOn : Commands.manualModeOff, replacements, frameOpts);
+                const cmd = buildCommand(state.val ? Commands.manualModeOn : Commands.manualModeOff, {}, frameOpts);
                 this.log.debug(`Built command: ${cmd}`);
                 this.stick.write(cmd);
             } else if (command === 'timeAutomatic') {
                 this.log.info(`Sending TIME AUTOMATIC ${state.val ? 'ON' : 'OFF'} command to device ${deviceId}`);
-                const cmd = buildCommand(state.val ? Commands.timeAutomaticOn : Commands.timeAutomaticOff, replacements, frameOpts);
+                const cmd = buildCommand(state.val ? Commands.timeAutomaticOn : Commands.timeAutomaticOff, {}, frameOpts);
                 this.log.debug(`Built command: ${cmd}`);
                 this.stick.write(cmd);
             } else if (command === 'sunAutomatic') {
                 this.log.info(`Sending SUN AUTOMATIC ${state.val ? 'ON' : 'OFF'} command to device ${deviceId}`);
-                const cmd = buildCommand(state.val ? Commands.sunAutomaticOn : Commands.sunAutomaticOff, replacements, frameOpts);
+                const cmd = buildCommand(state.val ? Commands.sunAutomaticOn : Commands.sunAutomaticOff, {}, frameOpts);
                 this.log.debug(`Built command: ${cmd}`);
                 this.stick.write(cmd);
             } else if (command === 'dawnAutomatic') {
                 this.log.info(`Sending DAWN AUTOMATIC ${state.val ? 'ON' : 'OFF'} command to device ${deviceId}`);
-                const cmd = buildCommand(state.val ? Commands.dawnAutomaticOn : Commands.dawnAutomaticOff, replacements, frameOpts);
+                const cmd = buildCommand(state.val ? Commands.dawnAutomaticOn : Commands.dawnAutomaticOff, {}, frameOpts);
                 this.log.debug(`Built command: ${cmd}`);
                 this.stick.write(cmd);
             } else if (command === 'duskAutomatic') {
                 this.log.info(`Sending DUSK AUTOMATIC ${state.val ? 'ON' : 'OFF'} command to device ${deviceId}`);
-                const cmd = buildCommand(state.val ? Commands.duskAutomaticOn : Commands.duskAutomaticOff, replacements, frameOpts);
+                const cmd = buildCommand(state.val ? Commands.duskAutomaticOn : Commands.duskAutomaticOff, {}, frameOpts);
                 this.log.debug(`Built command: ${cmd}`);
                 this.stick.write(cmd);
             } else if (command === 'rainAutomatic') {
                 this.log.info(`Sending RAIN AUTOMATIC ${state.val ? 'ON' : 'OFF'} command to device ${deviceId}`);
-                const cmd = buildCommand(state.val ? Commands.rainAutomaticOn : Commands.rainAutomaticOff, replacements, frameOpts);
+                const cmd = buildCommand(state.val ? Commands.rainAutomaticOn : Commands.rainAutomaticOff, {}, frameOpts);
                 this.log.debug(`Built command: ${cmd}`);
                 this.stick.write(cmd);
             } else if (command === 'windAutomatic') {
                 this.log.info(`Sending WIND AUTOMATIC ${state.val ? 'ON' : 'OFF'} command to device ${deviceId}`);
-                const cmd = buildCommand(state.val ? Commands.windAutomaticOn : Commands.windAutomaticOff, replacements, frameOpts);
+                const cmd = buildCommand(state.val ? Commands.windAutomaticOn : Commands.windAutomaticOff, {}, frameOpts);
                 this.log.debug(`Built command: ${cmd}`);
                 this.stick.write(cmd);
             } else if (command === 'ventilatingMode') {
                 this.log.info(`Sending VENTILATING MODE ${state.val ? 'ON' : 'OFF'} command to device ${deviceId}`);
-                const cmd = buildCommand(state.val ? Commands.ventilatingModeOn : Commands.ventilatingModeOff, replacements, frameOpts);
+                const cmd = buildCommand(state.val ? Commands.ventilatingModeOn : Commands.ventilatingModeOff, {}, frameOpts);
                 this.log.debug(`Built command: ${cmd}`);
                 this.stick.write(cmd);
             } else if (command === 'getStatus') {
