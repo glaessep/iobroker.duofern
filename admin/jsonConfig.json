@@ -1,0 +1,24 @@
+{
+    "i18n": true,
+    "type": "panel",
+    "items": {
+        "port": {
+            "type": "text",
+            "label": "Serial Port",
+            "help": "Serial Port Help",
+            "sm": 12,
+            "md": 6,
+            "lg": 4
+        },
+        "code": {
+            "type": "text",
+            "label": "DuoFern Stick Code (6 hex digits, e.g. 6Fxxxx)",
+            "help": "Stick Code Help",
+            "sm": 12,
+            "md": 6,
+            "lg": 4,
+            "validator": "^6[Ff][0-9A-Fa-f]{4}$",
+            "validatorError": "Wrong format: Must start with 6F and be 6 hex digits long"
+        }
+    }
+}

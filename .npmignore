@@ -1,0 +1,35 @@
+# Source files
+src/
+tsconfig.json
+
+# Development files
+.github/
+.vscode/
+.idea/
+
+# Git files
+.gitignore
+.git/
+
+# Build artifacts that shouldn't be published
+*.log
+npm-debug.log*
+
+# Test files
+test/
+coverage/
+
+# Development dependencies
+node_modules/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Development configuration
+.env*
+*.backup
+*.orig
+
+#scripts
+scripts/

@@ -1,0 +1,157 @@
+{
+    "common": {
+        "name": "duofern",
+        "version": "0.3.4",
+        "news": {
+            "0.3.4": {
+                "en": "Fix device name preservation - names are no longer overwritten when adapter is redeployed",
+                "de": "Gerätename-Erhaltung korrigiert - Namen werden nicht mehr überschrieben wenn der Adapter neu bereitgestellt wird"
+            },
+            "0.3.2": {
+                "en": "Add status broadcast functionality to improve device state synchronization",
+                "de": "Status-Broadcast-Funktionalität hinzugefügt zur Verbesserung der Gerätestatus-Synchronisierung"
+            },
+            "0.3.1": {
+                "en": "Implement button state reset functionality with timers and improve validator regex for DuoFern Stick Code to be case insensitive",
+                "de": "Button-Status-Reset-Funktionalität mit Timern implementiert und Validator-Regex für DuoFern-Stick-Code verbessert (case insensitive)"
+            },
+            "0.3.0": {
+                "en": "Added reopen command to reinitialize connection to DuoFern stick",
+                "de": "Reopen-Befehl hinzugefügt um Verbindung zum DuoFern-Stick neu zu initialisieren"
+            },
+            "0.2.0": {
+                "en": "Added device name and code properties, updated documentation, and improved protocol consistency",
+                "de": "Gerätename und Code-Eigenschaften hinzugefügt, Dokumentation aktualisiert und Protokollkonsistenz verbessert"
+            },
+            "0.1.8": {
+                "en": "Added remote pairing support, improved command handling, refined moving state logic, and removed extra languages",
+                "de": "Remote-Pairing-Unterstützung hinzugefügt, Befehlsbehandlung verbessert, Logik für den Bewegungsstatus verfeinert und zusätzliche Sprachen entfernt"
+            },
+            "0.1.0": {
+                "en": "Fix DuoFern command structure and implement 4-byte commands",
+                "de": "DuoFern-Befehlsstruktur korrigiert und 4-Byte-Befehle implementiert"
+            },
+            "0.0.17": {
+                "en": "Remote pairing support and improved version management with deployment workflow enhancements",
+                "de": "Remote-Pairing-Unterstützung und verbessertes Versionsverwaltung mit Deployment-Workflow-Verbesserungen"
+            },
+            "0.0.13": {
+                "en": "Added remote pairing support, status request functionality, and improved version management",
+                "de": "Remote-Pairing-Unterstützung, Statusanfrage-Funktionalität und verbesserte Versionsverwaltung hinzugefügt"
+            },
+            "0.0.12": {
+                "en": "Bug fixes and deployment workflow improvements",
+                "de": "Fehlerbehebungen und Verbesserungen am Deployment-Workflow"
+            },
+            "0.0.11": {
+                "en": "Improved logging and bug fixes",
+                "de": "Verbessertes Logging und Fehlerbehebungen"
+            },
+            "0.0.10": {
+                "en": "Refactored command building with improved DuoFern protocol frame wrapping, better code organization",
+                "de": "Refaktorierung des Befehlsaufbaus mit verbessertem DuoFern-Protokoll-Framegewrapping, bessere Codeorganisation"
+            },
+            "0.0.9": {
+                "en": "Added command buttons (up, down, stop, toggle), fixed position command, added comprehensive debug logging",
+                "de": "Befehls-Schaltflächen hinzugefügt (hoch, runter, stop, toggle), Positionsbefehl korrigiert, umfangreiche Debug-Protokollierung hinzugefügt"
+            },
+            "0.0.8": {
+                "en": "Disabled automatic file logging to fix permission issues",
+                "de": "Automatische Dateiprotokollierung deaktiviert um Berechtigungsprobleme zu beheben"
+            },
+            "0.0.7": {
+                "en": "Fixed adapter startup and module export for ioBroker",
+                "de": "Adapter-Start und Modul-Export für ioBroker korrigiert"
+            },
+            "0.0.6": {
+                "en": "Fixed admin UI configuration, improved initialization",
+                "de": "Admin-UI Konfiguration korrigiert, Initialisierung verbessert"
+            },
+            "0.0.2": {
+                "en": "initial release",
+                "de": "Erstveröffentlichung"
+            }
+        },
+        "title": "DuoFern",
+        "titleLang": {
+            "en": "DuoFern",
+            "de": "DuoFern"
+        },
+        "desc": {
+            "en": "Connect DuoFern devices via DuoFern USB Stick",
+            "de": "Verbindet DuoFern Geräte über den DuoFern USB Stick"
+        },
+        "author": {
+            "name": "Patrick Gläßer",
+            "email": "patrick.glaesser@hotmail.de"
+        },
+        "contributors": [
+            "Patrick Gläßer"
+        ],
+        "license": "MIT",
+        "keywords": [
+            "ioBroker",
+            "duofern",
+            "rademacher",
+            "smart home",
+            "home automation"
+        ],
+        "platform": "Javascript/Node.js",
+        "main": "build/main.js",
+        "icon": "duofern.svg",
+        "enabled": false,
+        "extIcon": "https://raw.githubusercontent.com/glaessep/iobroker.duofern/main/admin/duofern.svg",
+        "readme": "https://github.com/glaessep/iobroker.duofern/blob/main/README.md",
+        "docs": {
+            "en": "docs/en/README.md",
+            "de": "docs/de/README.md"
+        },
+        "loglevel": "info",
+        "mode": "daemon",
+        "type": "iot-systems",
+        "compact": true,
+        "connectionType": "local",
+        "dataSource": "poll",
+        "adminUI": {
+            "config": "json"
+        },
+        "dependencies": [
+            {
+                "js-controller": ">=3.3.22"
+            }
+        ],
+        "globalDependencies": [
+            {
+                "admin": ">=5.1.13"
+            }
+        ]
+    },
+    "native": {
+        "port": "/dev/serial/by-id/usb-Rademacher_DuoFern_USB-Stick_WR00ABCD-if00-port0",
+        "code": "6F1A2B"
+    },
+    "objects": [],
+    "instanceObjects": [
+        {
+            "_id": "info",
+            "type": "channel",
+            "common": {
+                "name": "Information"
+            },
+            "native": {}
+        },
+        {
+            "_id": "info.connection",
+            "type": "state",
+            "common": {
+                "role": "indicator.connected",
+                "name": "Device or service connected",
+                "type": "boolean",
+                "read": true,
+                "write": false,
+                "def": false
+            },
+            "native": {}
+        }
+    ]
+}

@@ -1,0 +1,23 @@
+# Mocha Test Configuration
+
+# Test files pattern
+spec: 'test/**/*.test.ts'
+
+# Require ts-node for TypeScript support
+require: 'ts-node/register'
+
+# Test environment
+ui: 'bdd'
+reporter: 'spec'
+
+# Timeout settings
+timeout: 5000
+
+# Exit after tests complete
+exit: true
+
+# Use colors in output
+color: true
+
+# Include source maps
+full-trace: true
