@@ -1,3 +1,15 @@
+/**
+ * @file Protocol Test Suite
+ * 
+ * Comprehensive unit tests for the DuoFern protocol implementation.
+ * Tests command frame structure, initialization sequences, and validates
+ * all commands against captured protocol traffic.
+ * 
+ * @module test/protocol.test
+ * @author Patrick Gläßer
+ * @license MIT
+ */
+
 import * as assert from 'assert';
 import { buildCommand, Commands, Protocol, buildStatusRequest, buildSetDongle, buildSetPairs, buildBroadcastStatusRequest, buildRemotePairFrames } from '../src/duofern/protocol';
 

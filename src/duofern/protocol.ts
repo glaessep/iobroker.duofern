@@ -1,3 +1,22 @@
+/**
+ * @file DuoFern Protocol Definitions
+ * 
+ * Defines the DuoFern serial protocol commands, frame builders, and command constants.
+ * All commands are 4-byte structures (8 hex chars) that get wrapped in 22-byte frames
+ * (44 hex chars) with proper device addressing and padding.
+ * 
+ * The protocol implementation is based on reverse engineering and analysis of the
+ * FHEM DuoFern module behavior.
+ */
+
+/**
+ * Protocol-level command templates and patterns.
+ * 
+ * Contains initialization sequences, pairing commands, acknowledgment patterns,
+ * and frame matching regular expressions.
+ * 
+ * @constant {Object} Protocol
+ */
 export const Protocol = {
     // Init sequences
     duoInit1: "01000000000000000000000000000000000000000000",
@@ -25,6 +44,18 @@ export const Protocol = {
     statusFrame: /^(06|0F).{42}$/, // Status messages 
 };
 
+/**
+ * Device command definitions.
+ * 
+ * All commands are 4-byte structures (8 hex characters) consisting of:
+ * - Byte 0: Command prefix (typically 07 for movement, 08 for settings)
+ * - Byte 1: Sub-command identifier
+ * - Bytes 2-3: Parameters (often 00 00, or containing position/value)
+ * 
+ * These commands are wrapped in full 22-byte frames by buildCommand().
+ * 
+ * @constant {Object.<string, string>} Commands
+ */
 export const Commands = {
     // Basic Movement - All commands are 4 bytes: prefix + cmd + param1 + param2
     up: "07010000",        // 4 bytes: 07 01 00 00
@@ -69,6 +100,16 @@ export const Commands = {
 
 };
 
+/**
+ * Builds the "Set Dongle" initialization command.
+ * 
+ * This command configures the stick with its 6-digit serial number during initialization.
+ * 
+ * @export
+ * @param {string} serial - 6-character hex string representing the stick's serial number
+ * @returns {string} 44-character hex frame ready to send
+ * @throws {Error} If serial is not exactly 6 hex digits
+ */
 export function buildSetDongle(serial: string): string {
     if (!/^[0-9A-F]{6}$/i.test(serial)) {
         throw new Error("Invalid dongle serial. Must be 6 hex digits.");
@@ -76,12 +117,30 @@ export function buildSetDongle(serial: string): string {
     return Protocol.duoSetDongle.replace("zzzzzz", serial.toUpperCase());
 }
 
+/**
+ * Builds a "Set Pairs" command to register a known device during initialization.
+ * 
+ * Each known device must be registered with a sequential counter during the
+ * initialization sequence so the stick can recognize and communicate with it.
+ * 
+ * @export
+ * @param {number} counter - Sequential device counter (0, 1, 2, ...)
+ * @param {string} deviceCode - 6-character hex device code
+ * @returns {string} 44-character hex frame ready to send
+ */
 export function buildSetPairs(counter: number, deviceCode: string): string {
     const nn = counter.toString(16).padStart(2, "0").toUpperCase();
     const yyyyyy = deviceCode.toUpperCase();
     return Protocol.duoSetPairs.replace("nn", nn).replace("yyyyyy", yyyyyy);
 }
 
+/**
+ * Builds a remote pairing command for the initialization sequence.
+ * 
+ * @export
+ * @param {string} deviceCode - 6-character hex device code to pair
+ * @returns {string} 44-character hex frame ready to send
+ */
 export function buildRemotePair(deviceCode: string): string {
     return Protocol.duoRemotePair.replace("yyyyyy", deviceCode.toUpperCase());
 }
@@ -89,6 +148,7 @@ export function buildRemotePair(deviceCode: string): string {
 /**
  * Builds a 22-byte (44-character) command frame for DuoFern devices.
  *
+ * @exports
  * @param template - 4-byte (8 hex char) command body from Commands object (e.g., Commands.up)
  * @param replacements - Dynamic values to replace placeholders in template (e.g., {"nn": position})
  * @param options - Frame parameters: deviceCode (6 hex), stickCode (6 hex), channel (2 hex), suffix (2 hex)
@@ -161,6 +221,10 @@ export function buildCommand(
 /**
  * Build a status request for a specific device (or broadcast with FFFFFF).
  * Uses channel FF, no stick code, and suffix 01.
+ * 
+ * @export
+ * @param {string} deviceCode - 6-character hex device code to query
+ * @returns {string} 44-character hex frame ready to send
  */
 export function buildStatusRequest(deviceCode: string): string {
     return buildCommand(Commands.statusRequest, {}, {
@@ -174,11 +238,25 @@ export function buildStatusRequest(deviceCode: string): string {
 /**
  * Build a broadcast status request to all devices (equivalent to FHEM's statusBroadcast).
  * This is a convenience function that calls buildStatusRequest with 'FFFFFF'.
+ * 
+ * @export
+ * @returns {string} 44-character hex frame ready to send
  */
 export function buildBroadcastStatusRequest(): string {
     return buildStatusRequest('FFFFFF');
 }
 
+/**
+ * Builds remote pair command frames for pairing a device without physical button press.
+ * 
+ * Generates two frames (with suffixes 00 and 01) that must be sent in sequence
+ * to remotely pair a device.
+ * 
+ * @export
+ * @param {string} deviceCode - 6-character hex device code to pair
+ * @param {string} [channel="01"] - Channel identifier (default: "01")
+ * @returns {string[]} Array of two 44-character hex frames
+ */
 export function buildRemotePairFrames(deviceCode: string, channel = "01"): string[] {
     const dev = deviceCode.toUpperCase();
     const chan = channel.toUpperCase();

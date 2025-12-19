@@ -1,4 +1,22 @@
+/**
+ * @file DuoFern Protocol Status Parser
+ * 
+ * Parses incoming status frames from DuoFern devices into human-readable objects.
+ * Handles bit extraction, value mapping, and inversion according to the DuoFern
+ * protocol specification.
+ * 
+ * The parser supports multiple device types and status frame formats, with mappings
+ * defined for blinds, shutters, and other actuators.
+ */
 
+/**
+ * Definition structure for a status identifier.
+ * 
+ * Describes how to extract and interpret a specific status value from a frame,
+ * including its bit position, mapping rules, and channel-specific configuration.
+ * 
+ * @interface StatusIdDef
+ */
 interface StatusIdDef {
     name: string;
     map?: string;
@@ -12,6 +30,23 @@ interface StatusIdDef {
     }
 }
 
+/**
+ * Maps frame format identifiers to arrays of status IDs.
+ * 
+ * Each frame format byte (byte 3 at index 6-7) corresponds to a specific set of
+ * status values that can be extracted from that frame type. Different device types
+ * and configurations use different formats.
+ * 
+ * Format identifiers:
+ * - "21": Basic blind/shutter status (position, automatics, sun mode, ventilating)
+ * - "22": Reserved for other device types (not yet implemented)
+ * - "23": Extended blind status with slat/tilt control
+ * - "23a": Alternate extended blind format
+ * - "24": Blind status with wind/rain modes and obstacle detection
+ * - "24a": Gate/door status with light curtain, automatic closing, alarms
+ * 
+ * @constant {Object.<string, number[]>} statusGroups
+ */
 const statusGroups: { [key: string]: number[] } = {
     "21": [100, 101, 102, 104, 105, 106, 111, 112, 113, 114, 50],
     "22": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
@@ -23,14 +58,19 @@ const statusGroups: { [key: string]: number[] } = {
 };
 
 /**
- * Maps logical status identifiers to their possible raw values or labels.
- *
+ * Maps status value names to their possible values or transformation rules.
+ * 
+ * For boolean mappings (e.g., "onOff"), provides text labels for bit values.
+ * For scale mappings (e.g., "scale10"), provides multiplier and offset for numeric conversion.
+ * 
  * Note on the "moving" mapping:
  * The related status bit does not represent direction or whether the device
  * is currently moving. It is intentionally mapped to "stop" for both bit
  * values. The actual moving state ("up", "down", "moving", "stop") is
  * managed entirely by command logic when handling up/down/position
  * commands, rather than being derived from device status bytes.
+ * 
+ * @constant {Object.<string, any[]>} statusMapping
  */
 const statusMapping: { [key: string]: any[] } = {
     "onOff": ["off", "on"],
@@ -47,6 +87,27 @@ const statusMapping: { [key: string]: any[] } = {
     "hex": [1, 0],
 };
 
+/**
+ * Maps status ID numbers to their extraction and interpretation definitions.
+ * 
+ * Each status ID defines:
+ * - `name`: The semantic name of the status field (e.g., "position", "sunMode")
+ * - `map`: Optional reference to statusMapping for value transformation
+ * - `invert`: Optional inversion formula (e.g., 100 - value for position)
+ * - `chan`: Channel-specific extraction rules with bit position and range
+ * 
+ * Status ID ranges:
+ * - 1-49: Reserved (not yet implemented)
+ * - 50: Moving state indicator
+ * - 100-141: Blind/shutter status values (position, modes, automatics)
+ * - 400-411: Gate/door-specific status values (obstacles, alarms, sensors)
+ * 
+ * The bit extraction uses:
+ * - `position`: Byte offset from format byte (0 = format byte itself)
+ * - `from`/`to`: Bit range within the 16-bit value (position * 2 bytes)
+ * 
+ * @constant {Object.<number, StatusIdDef>} statusIds
+ */
 const statusIds: { [key: number]: StatusIdDef } = {
     50: { "name": "moving", "map": "moving", "chan": { "01": { "position": 0, "from": 0, "to": 0 }, "02": { "position": 0, "from": 0, "to": 0 } } },
     100: { "name": "sunAutomatic", "map": "onOff", "chan": { "01": { "position": 0, "from": 2, "to": 2 } } },
@@ -97,6 +158,21 @@ const statusIds: { [key: number]: StatusIdDef } = {
     411: { "name": "light", "map": "onOff", "chan": { "01": { "position": 9, "from": 2, "to": 2 } } },
 };
 
+/**
+ * Parses a DuoFern status frame into a structured object.
+ * 
+ * Takes a 44-character hex frame (22 bytes) and extracts status values based on
+ * the frame format byte. Each status value is extracted using bit manipulation,
+ * then optionally inverted and/or mapped to human-readable values.
+ * 
+ * @export
+ * @param {string} frame - 44-character hex string status frame (format: 0FFF0F...)
+ * @returns {Record<string, any>} Object with status field names as keys and parsed values
+ * 
+ * @example
+ * const status = parseStatus('0FFF0F21...');
+ * // Returns: { position: 50, moving: 'stop', sunAutomatic: 'on', ... }
+ */
 export function parseStatus(frame: string): Record<string, any> {
     // Frame format: 0FFF0F...
     // Byte 3 (index 6-7) is format

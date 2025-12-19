@@ -1,7 +1,36 @@
+/**
+ * @file DuoFern USB Stick Communication Handler
+ * 
+ * Manages serial communication with the Rademacher DuoFern USB stick.
+ * Handles:
+ * - Serial port connection lifecycle
+ * - Initialization sequence with device registration
+ * - Command queueing with ACK-based flow control
+ * - Frame buffering and parsing
+ * - Pairing/unpairing operations
+ */
+
 import { SerialPort } from 'serialport';
 import { EventEmitter } from 'events';
 import { Protocol, buildSetDongle, buildSetPairs, buildRemotePair } from './protocol';
 
+/**
+ * DuoFern USB stick communication handler.
+ * 
+ * Extends EventEmitter to provide event-based notifications for:
+ * - 'log': Log messages (level, message)
+ * - 'error': Error events
+ * - 'open': Port opened
+ * - 'initialized': Initialization completed successfully
+ * - 'frame': Raw frame received
+ * - 'message': Status or data message received
+ * - 'paired': Device pairing event
+ * - 'unpaired': Device unpairing event
+ * 
+ * @export
+ * @class DuoFernStick
+ * @extends {EventEmitter}
+ */
 export class DuoFernStick extends EventEmitter {
     private port: SerialPort;
     private buffer: string = "";
@@ -14,6 +43,13 @@ export class DuoFernStick extends EventEmitter {
     private initResponseCallback: ((frame: string) => void) | null = null;
     private queueTimeout: NodeJS.Timeout | null = null;
 
+    /**
+     * Creates an instance of DuoFernStick.
+     * 
+     * @param {string} path - Serial port path (e.g., '/dev/ttyUSB0' or 'COM3')
+     * @param {string} dongleSerial - 6-character hex serial number of the stick (starts with 6F)
+     * @param {string[]} [knownDevices=[]] - Array of 6-character hex device codes to register during init
+     */
     constructor(path: string, dongleSerial: string, knownDevices: string[] = []) {
         super();
         this.dongleSerial = dongleSerial;
@@ -25,6 +61,15 @@ export class DuoFernStick extends EventEmitter {
         this.port.on('error', (err) => this.emit('error', err));
     }
 
+    /**
+     * Opens the serial port connection.
+     * 
+     * Triggers the onOpen() handler which starts the initialization sequence.
+     * 
+     * @async
+     * @returns {Promise<void>}
+     * @throws {Error} If port cannot be opened
+     */
     public async open(): Promise<void> {
         return new Promise((resolve, reject) => {
             this.port.open((err) => {
@@ -34,6 +79,12 @@ export class DuoFernStick extends EventEmitter {
         });
     }
 
+    /**
+     * Closes the serial port connection.
+     * 
+     * @async
+     * @returns {Promise<void>}
+     */
     public close(): Promise<void> {
         return new Promise((resolve, reject) => {
             if (this.port.isOpen) {
@@ -46,12 +97,25 @@ export class DuoFernStick extends EventEmitter {
             }
         });
     }
-
-    private onOpen() {
+    /**
+     * Called when the serial port is opened.
+     * 
+     * Initiates the stick initialization sequence.
+     * 
+     * @private
+     */    private onOpen() {
         this.emit('open');
         this.startInit();
     }
 
+    /**
+     * Handles incoming serial data.
+     * 
+     * Buffers hex data and extracts complete 22-byte (44 hex char) frames.
+     * 
+     * @private
+     * @param {Buffer} data - Raw data from serial port
+     */
     private handleData(data: Buffer) {
         const hex = data.toString('hex').toUpperCase();
         this.buffer += hex;
@@ -63,6 +127,19 @@ export class DuoFernStick extends EventEmitter {
         }
     }
 
+    /**
+     * Processes a complete 44-character hex frame.
+     * 
+     * Handles:
+     * - Initialization responses (during init sequence)
+     * - ACK frames (to advance command queue)
+     * - Message frames (status, pairing events)
+     * 
+     * Automatically sends ACK in response to message frames.
+     * 
+     * @private
+     * @param {string} frame - Complete 44-character hex frame
+     */
     private handleFrame(frame: string) {
         this.emit('log', 'debug', `RX: ${frame}`);
         this.emit('frame', frame);
@@ -100,6 +177,23 @@ export class DuoFernStick extends EventEmitter {
         }
     }
 
+    /**
+     * Executes the complete initialization sequence.
+     * 
+     * Sends:
+     * 1. INIT1 and INIT2 commands
+     * 2. SetDongle with stick serial
+     * 3. INIT3
+     * 4. SetPairs for each known device
+     * 5. InitEnd
+     * 6. Initial status request
+     * 
+     * Emits 'initialized' event upon successful completion.
+     * 
+     * @private
+     * @async
+     * @throws {Error} If initialization fails or times out
+     */
     private async startInit() {
         try {
             this.emit('log', 'info', 'Starting DuoFern stick initialization...');
@@ -145,6 +239,18 @@ export class DuoFernStick extends EventEmitter {
         }
     }
 
+    /**
+     * Sends an initialization command and waits for response.
+     * 
+     * Uses a promise-based approach with timeout to ensure each init step
+     * receives a response before proceeding.
+     * 
+     * @private
+     * @param {string} cmd - 44-character hex command frame
+     * @param {string} stepName - Descriptive name for logging
+     * @returns {Promise<string>} Response frame
+     * @throws {Error} If timeout (3 seconds) is reached without response
+     */
     private sendInitCommand(cmd: string, stepName: string): Promise<string> {
         return new Promise((resolve, reject) => {
             this.currentInitStep = stepName;
@@ -164,6 +270,16 @@ export class DuoFernStick extends EventEmitter {
         });
     }
 
+    /**
+     * Queues a command for transmission.
+     * 
+     * Commands are queued and sent one at a time, waiting for ACK before
+     * sending the next. If not yet initialized, commands remain queued until
+     * initialization completes.
+     * 
+     * @public
+     * @param {string} cmd - 44-character hex command frame
+     */
     public write(cmd: string) {
         this.emit('log', 'debug', `Queuing command: ${cmd}`);
         this.queue.push(cmd);
@@ -174,12 +290,28 @@ export class DuoFernStick extends EventEmitter {
         }
     }
 
+    /**
+     * Immediately writes a command to the serial port without queueing.
+     * 
+     * Used internally for ACKs and during initialization.
+     * 
+     * @private
+     * @param {string} cmd - 44-character hex command frame
+     */
     private writeRaw(cmd: string) {
         this.emit('log', 'debug', `TX: ${cmd}  (length: ${cmd.length})`);
         const buf = Buffer.from(cmd, 'hex');
         this.port.write(buf);
     }
 
+    /**
+     * Processes the command queue.
+     * 
+     * Sends the next queued command and sets up a timeout to handle missing ACKs.
+     * Called when ACK is received or timeout expires.
+     * 
+     * @private
+     */
     private processQueue() {
         if (this.queue.length === 0) {
             this.emit('log', 'debug', 'Command queue empty');
@@ -201,18 +333,49 @@ export class DuoFernStick extends EventEmitter {
         }
     }
 
+    /**
+     * Starts pairing mode to learn new devices.
+     * 
+     * Press the device's button while in pairing mode to pair it.
+     * 
+     * @public
+     */
     public pair() {
         this.write(Protocol.duoStartPair);
     }
 
+    /**
+     * Starts unpairing mode to remove devices.
+     * 
+     * Press the device's button while in unpairing mode to unpair it.
+     * 
+     * @public
+     */
     public unpair() {
         this.write(Protocol.duoStartUnpair);
     }
 
+    /**
+     * Remotely pairs a device without physical button press.
+     * 
+     * @public
+     * @param {string} code - 6-character hex device code to pair
+     */
     public remotePair(code: string) {
         this.write(buildRemotePair(code));
     }
 
+    /**
+     * Closes and reopens the connection, re-running initialization.
+     * 
+     * Useful for recovering from communication errors or reinitializing
+     * the stick with updated device lists.
+     * 
+     * @public
+     * @async
+     * @returns {Promise<void>}
+     * @throws {Error} If reopen fails
+     */
     public async reopen(): Promise<void> {
         this.emit('log', 'info', 'Reopening connection to DuoFern stick...');
         try {
