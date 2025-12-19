@@ -1,8 +1,21 @@
+/**
+ * @file ioBroker DuoFern Adapter Main Module
+ * 
+ * This module implements the core ioBroker adapter for Rademacher DuoFern devices.
+ * It provides the main adapter logic that bridges ioBroker's state management system
+ * with the DuoFern USB stick hardware communication layer.
+ */
+
 import * as utils from '@iobroker/adapter-core';
 import { DuoFernStick } from './duofern/stick';
 import { parseStatus } from './duofern/parser';
 import { buildCommand, buildRemotePairFrames, buildStatusRequest, buildBroadcastStatusRequest, Commands } from './duofern/protocol';
 
+/**
+ * Configuration interface for the DuoFern adapter.
+ * 
+ * @interface DuoFernAdapterConfig
+ */
 interface DuoFernAdapterConfig {
     port: string;
     code: string;
@@ -59,11 +72,30 @@ const DEVICE_TYPES: { [key: string]: string } = {
     "E1": "Heizkoerperantrieb",
 };
 
+/**
+ * Main adapter class for ioBroker DuoFern integration.
+ * 
+ * This class extends the ioBroker Adapter base class and provides the main logic
+ * for communicating with DuoFern devices via the USB stick. It handles:
+ * - Serial port communication initialization
+ * - Device discovery and pairing
+ * - Command execution (up, down, stop, position, etc.)
+ * - Status updates from devices
+ * - State management in ioBroker
+ * 
+ * @class DuoFernAdapter
+ * @extends {utils.Adapter}
+ */
 export class DuoFernAdapter extends utils.Adapter {
     private stick: DuoFernStick | null = null;
     public declare config: DuoFernAdapterConfig;
     private buttonResetTimers: Map<string, NodeJS.Timeout> = new Map();
 
+    /**
+     * Creates an instance of DuoFernAdapter.
+     * 
+     * @param {Partial<utils.AdapterOptions>} [options={}] - Adapter options passed from ioBroker core
+     */
     public constructor(options: Partial<utils.AdapterOptions> = {}) {
         super({
             ...options,
@@ -101,6 +133,17 @@ export class DuoFernAdapter extends utils.Adapter {
         this.buttonResetTimers.set(stateId, timer);
     }
 
+    /**
+     * Called when the adapter starts up.
+     * 
+     * Initializes the DuoFern stick connection, loads known devices from ioBroker objects,
+     * sets up event handlers, and creates control states for adapter-level operations.
+     * Validates configuration (port and stick code) before attempting to connect.
+     * 
+     * @private
+     * @async
+     * @returns {Promise<void>}
+     */
     private async onReady(): Promise<void> {
         this.log.info('DuoFern adapter starting...');
 
@@ -215,6 +258,15 @@ export class DuoFernAdapter extends utils.Adapter {
         this.subscribeStates('*');
     }
 
+    /**
+     * Handles incoming message frames from the DuoFern stick.
+     * 
+     * Processes status update frames (starting with 0FFF0F), extracts the device code,
+     * parses the status data, and updates the corresponding ioBroker states.
+     * 
+     * @private
+     * @param {string} frame - The 44-character hex frame received from the stick
+     */
     private handleMessage(frame: string) {
         this.log.debug(`Received message frame: ${frame}`);
         if (frame.startsWith("0FFF0F")) {
@@ -226,6 +278,17 @@ export class DuoFernAdapter extends utils.Adapter {
         }
     }
 
+    /**
+     * Handles device pairing and unpairing events.
+     * 
+     * Extracts the device code from the frame and updates the device states
+     * to reflect the paired/unpaired status.
+     * 
+     * @private
+     * @async
+     * @param {string} frame - The pairing/unpairing frame (0602... or 0603...)
+     * @param {boolean} paired - True if device was paired, false if unpaired
+     */
     private async handlePairing(frame: string, paired: boolean) {
         // 0602... or 0603...
         // Code is at 30,6?
@@ -241,6 +304,19 @@ export class DuoFernAdapter extends utils.Adapter {
         }
     }
 
+    /**
+     * Updates or creates ioBroker states for a DuoFern device.
+     * 
+     * Creates the device object if it doesn't exist, then creates/updates all necessary
+     * state objects including control buttons (up, down, stop, etc.) and status values
+     * (position, moving, automatics, etc.). Also handles the "moving" state logic based
+     * on position changes.
+     * 
+     * @private
+     * @async
+     * @param {string} code - The 6-digit hex device code
+     * @param {any} status - Object containing status key-value pairs from parsed frame
+     */
     private async updateDeviceStates(code: string, status: any) {
         await this.setObjectNotExistsAsync(code, {
             type: 'device',
@@ -389,6 +465,22 @@ export class DuoFernAdapter extends utils.Adapter {
         }
     }
 
+    /**
+     * Handles state changes triggered by the user or other adapters.
+     * 
+     * This is the main command handler that translates ioBroker state changes into
+     * DuoFern protocol commands. Handles:
+     * - Adapter-level commands (pair, unpair, reopen, statusBroadcast)
+     * - Device-level commands (up, down, stop, position, toggle, getStatus)
+     * - Mode and automatic settings (sunMode, manualMode, timeAutomatic, etc.)
+     * - Device name changes and remote pairing
+     * 
+     * @private
+     * @async
+     * @param {string} id - The state ID that changed
+     * @param {ioBroker.State | null | undefined} state - The new state value
+     * @returns {Promise<void>}
+     */
     private async onStateChange(id: string, state: ioBroker.State | null | undefined): Promise<void> {
         if (!state || state.ack) return;
 
@@ -667,6 +759,15 @@ export class DuoFernAdapter extends utils.Adapter {
         }
     }
 
+    /**
+     * Called when the adapter is shutting down.
+     * 
+     * Cleans up resources including button reset timers and closes the serial port connection.
+     * 
+     * @private
+     * @param {() => void} callback - Callback to signal shutdown completion
+     * @returns {void}
+     */
     private onUnload(callback: () => void): void {
         this.log.info('Shutting down DuoFern adapter...');
 
@@ -692,7 +793,14 @@ export class DuoFernAdapter extends utils.Adapter {
     }
 }
 
-// Export the adapter factory function for ioBroker
+/**
+ * Factory function to create and start the DuoFern adapter instance.
+ * 
+ * This function is called by ioBroker to instantiate the adapter.
+ * 
+ * @param {Partial<utils.AdapterOptions> | undefined} options - Adapter options from ioBroker
+ * @returns {DuoFernAdapter} The adapter instance
+ */
 function startAdapter(options: Partial<utils.AdapterOptions> | undefined): DuoFernAdapter {
     return new DuoFernAdapter(options);
 }

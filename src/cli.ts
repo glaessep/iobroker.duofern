@@ -1,3 +1,13 @@
+/**
+ * @file DuoFern CLI Test Environment
+ * 
+ * A command-line interface for testing and debugging DuoFern stick communication.
+ * Provides interactive commands to initialize the stick, pair/unpair devices,
+ * send raw hex commands, and monitor received frames.
+ * 
+ * This is primarily a development and debugging tool, not part of the main adapter.
+ */
+
 import * as readline from 'readline';
 import { DuoFernStick } from './duofern/stick';
 import { parseStatus } from './duofern/parser';
