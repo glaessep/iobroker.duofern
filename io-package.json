@@ -127,7 +127,7 @@
         ]
     },
     "native": {
-        "port": "/dev/serial/by-id/usb-Rademacher_DuoFern_USB-Stick_WR00ABCD-if00-port0",
+        "port": "/dev/serial/by-id/...",
         "code": "6F1A2B"
     },
     "objects": [],
