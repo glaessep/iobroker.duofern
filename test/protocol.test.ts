@@ -11,7 +11,7 @@
  */
 
 import * as assert from 'assert';
-import { buildCommand, Commands, Protocol, buildStatusRequest, buildSetDongle, buildSetPairs, buildBroadcastStatusRequest, buildRemotePairFrames } from '../src/duofern/protocol';
+import { buildCommand, Commands, Protocol, buildStatusRequest, buildSetDongle, buildSetPairs, buildBroadcastStatusRequest, buildRemotePairFrames, buildRemotePair } from '../src/duofern/protocol';
 
 describe('DuoFern Protocol', () => {
     const STICK_CODE = '6F1234';
@@ -348,6 +348,31 @@ describe('DuoFern Protocol', () => {
             assert.strictEqual(channel, 'FF', 'Should allow custom channel without stick code');
             assert.strictEqual(suffix, '01', 'Should allow custom suffix without stick code');
         });
+
+        it('should handle buildCommand with number replacements', () => {
+            const cmd = buildCommand('0707ttnn', { tt: 5, nn: 100 }, frameOpts);
+            assert.strictEqual(cmd.length, 44, 'Should handle number replacements');
+            assert.ok(cmd.includes('05'), 'Should convert tt=5 to hex');
+            assert.ok(cmd.includes('64'), 'Should convert nn=100 to hex (0x64)');
+        });
+
+        it('should handle buildCommand with string replacements', () => {
+            const cmd = buildCommand('0707ttnn', { tt: 'AB', nn: 'CD' }, frameOpts);
+            assert.strictEqual(cmd.length, 44, 'Should handle string replacements');
+            assert.ok(cmd.includes('AB'), 'Should include string replacement AB');
+            assert.ok(cmd.includes('CD'), 'Should include string replacement CD');
+        });
+
+        it('should pad short command templates', () => {
+            const cmd = buildCommand('07', {}, frameOpts);
+            assert.strictEqual(cmd.length, 44, 'Should pad short template to full frame');
+        });
+
+        it('should return command-only when no deviceCode provided', () => {
+            const cmd = buildCommand(Commands.up, {});
+            assert.strictEqual(cmd.length, 8, 'Should return 8-char command body when no device code');
+            assert.strictEqual(cmd, Commands.up, 'Should return template when no device code');
+        });
     });
 
     describe('buildRemotePairFrames', () => {
@@ -402,6 +427,23 @@ describe('DuoFern Protocol', () => {
             const cmd = buildBroadcastStatusRequest();
             const deviceCode = cmd.substring(36, 42);
             assert.strictEqual(deviceCode, 'FFFFFF', 'Should target all devices with FFFFFF');
+        });
+    });
+
+    describe('buildRemotePair', () => {
+        it('should replace device code placeholder', () => {
+            const cmd = buildRemotePair(DEVICE_CODE);
+            assert.ok(cmd.includes(DEVICE_CODE), 'Should include device code');
+        });
+
+        it('should uppercase device code', () => {
+            const cmd = buildRemotePair('49abcd');
+            assert.ok(cmd.includes('49ABCD'), 'Should uppercase device code');
+        });
+
+        it('should generate valid frame', () => {
+            const cmd = buildRemotePair(DEVICE_CODE);
+            assert.strictEqual(cmd.length, 44, 'Should be 44 hex chars');
         });
     });
 });
