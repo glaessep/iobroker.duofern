@@ -806,7 +806,8 @@ function startAdapter(options: Partial<utils.AdapterOptions> | undefined): DuoFe
 }
 
 if (require.main !== module) {
-    module.exports = startAdapter;
+    // Export using the pattern ioBroker expects
+    module.exports = (options: Partial<utils.AdapterOptions> | undefined) => new DuoFernAdapter(options);
 } else {
     // Manual start for testing
     startAdapter(undefined);
