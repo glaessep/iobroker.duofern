@@ -21,6 +21,7 @@
     "homepage": "https://github.com/glaessep/iobroker.duofern",
     "scripts": {
         "build": "tsc",
+        "prepare": "npm run build",
         "watch": "tsc -w",
         "test-env": "ts-node src/cli.ts",
         "test": "mocha --require ts-node/register 'test/**/*.test.ts' --timeout 10000 --exit",
