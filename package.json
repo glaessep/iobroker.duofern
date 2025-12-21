@@ -1,7 +1,8 @@
 {
     "name": "iobroker.duofern",
-    "version": "0.3.4",
+    "version": "0.4.0",
     "description": "ioBroker Adapter for Rademacher DuoFern",
+    "type": "commonjs",
     "author": "Patrick Gläßer",
     "license": "MIT",
     "main": "build/main.js",

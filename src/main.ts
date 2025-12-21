@@ -10,6 +10,7 @@ import * as utils from '@iobroker/adapter-core';
 import { DuoFernStick } from './duofern/stick';
 import { parseStatus } from './duofern/parser';
 import { buildCommand, buildRemotePairFrames, buildStatusRequest, buildBroadcastStatusRequest, Commands } from './duofern/protocol';
+import { getStateDefinitions } from './duofern/capabilities';
 
 /**
  * Configuration interface for the DuoFern adapter.
@@ -33,6 +34,7 @@ interface DuoFernAdapterConfig {
  * 
  * Source: https://wiki.fhem.de/wiki/Rademacher_DuoFern
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const DEVICE_TYPES: { [key: string]: string } = {
     "40": "RolloTron Standard",
     "41": "RolloTron Comfort Slave",
@@ -308,9 +310,8 @@ export class DuoFernAdapter extends utils.Adapter {
      * Updates or creates ioBroker states for a DuoFern device.
      * 
      * Creates the device object if it doesn't exist, then creates/updates all necessary
-     * state objects including control buttons (up, down, stop, etc.) and status values
-     * (position, moving, automatics, etc.). Also handles the "moving" state logic based
-     * on position changes.
+     * state objects based on centralized capability definitions from the capabilities module.
+     * This eliminates hardcoded state definitions and type guessing.
      * 
      * @private
      * @async
@@ -354,73 +355,26 @@ export class DuoFernAdapter extends utils.Adapter {
             native: {},
         });
 
-        // Create command buttons
-        await this.setObjectNotExistsAsync(`${code}.up`, {
-            type: 'state',
-            common: {
-                name: 'Up',
-                type: 'boolean',
-                role: 'button',
-                read: false,
-                write: true,
-            },
-            native: {},
-        });
-        await this.setObjectNotExistsAsync(`${code}.down`, {
-            type: 'state',
-            common: {
-                name: 'Down',
-                type: 'boolean',
-                role: 'button',
-                read: false,
-                write: true,
-            },
-            native: {},
-        });
-        await this.setObjectNotExistsAsync(`${code}.stop`, {
-            type: 'state',
-            common: {
-                name: 'Stop',
-                type: 'boolean',
-                role: 'button',
-                read: false,
-                write: true,
-            },
-            native: {},
-        });
-        await this.setObjectNotExistsAsync(`${code}.toggle`, {
-            type: 'state',
-            common: {
-                name: 'Toggle',
-                type: 'boolean',
-                role: 'button',
-                read: false,
-                write: true,
-            },
-            native: {},
-        });
-        await this.setObjectNotExistsAsync(`${code}.getStatus`, {
-            type: 'state',
-            common: {
-                name: 'Get Status',
-                type: 'boolean',
-                role: 'button',
-                read: false,
-                write: true,
-            },
-            native: {},
-        });
-        await this.setObjectNotExistsAsync(`${code}.remotePair`, {
-            type: 'state',
-            common: {
-                name: 'Remote Pair',
-                type: 'boolean',
-                role: 'button',
-                read: false,
-                write: true,
-            },
-            native: {},
-        });
+        // Get capability definitions for this device
+        const capabilities = getStateDefinitions();
+
+        // Create all state objects based on capabilities
+        for (const [key, def] of Object.entries(capabilities)) {
+            await this.setObjectNotExistsAsync(`${code}.${key}`, {
+                type: 'state',
+                common: {
+                    name: def.name,
+                    type: def.type,
+                    role: def.role,
+                    read: def.readable,
+                    write: def.writable,
+                    unit: def.unit,
+                    min: def.min,
+                    max: def.max,
+                },
+                native: {},
+            });
+        }
 
         // Check if we have a position change - this indicates movement has completed
         let positionChanged = false;
@@ -431,29 +385,14 @@ export class DuoFernAdapter extends utils.Adapter {
             }
         }
 
+        // Update status values received from device
         for (const [key, value] of Object.entries(status)) {
-            // Determine the correct type and role for each state
-            let stateType: 'number' | 'string' | 'boolean' = typeof value === 'number' ? 'number' : typeof value === 'boolean' ? 'boolean' : 'string';
-            let role = 'state';
-            let writable = true;
-
-            // Position should be writable
-            if (key === 'position') {
-                role = 'level';
+            // Only update states that have capability definitions
+            if (capabilities[key]) {
+                await this.setState(`${code}.${key}`, value as string | number | boolean, true);
+            } else {
+                this.log.debug(`Received unknown status field: ${key} = ${value}`);
             }
-
-            await this.setObjectNotExistsAsync(`${code}.${key}`, {
-                type: 'state',
-                common: {
-                    name: key,
-                    type: stateType,
-                    role: role,
-                    read: true,
-                    write: writable,
-                },
-                native: {},
-            });
-            await this.setState(`${code}.${key}`, value as string | number | boolean, true);
         }
 
         // If position changed or we received a moving status from device, reset moving state
