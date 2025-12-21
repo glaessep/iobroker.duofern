@@ -54,6 +54,27 @@ Enter the 6-digit hexadecimal code of your DuoFern stick:
 
 ## Development
 
+### Testing
+
+The project includes comprehensive unit tests with code coverage reporting:
+
+```bash
+# Run tests
+npm test
+
+# Run tests with coverage report
+npm run test:coverage
+
+# Run tests with coverage threshold validation
+npm run test:coverage:check
+```
+
+**Current Coverage:**
+- **Protocol Module**: 100% coverage ✅
+- **Parser Module**: 96.87% line coverage ✅
+
+See [COVERAGE.md](COVERAGE.md) for detailed coverage report.
+
 ### Test Environment
 A standalone CLI is provided to test the library and the stick without ioBroker.
 
