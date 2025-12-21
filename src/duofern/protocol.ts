@@ -263,7 +263,7 @@ export function buildRemotePairFrames(deviceCode: string, channel = "01"): strin
     // Build frames matching the Protocol.duoRemotePair structure:
     // "0D" + channel + "060100" + 26 zero hex chars + deviceCode (6 hex) + suffix
     // Total: 44 hex chars (22 bytes)
-    const frame = (suffix: string) =>
+    const frame = (suffix: string): string =>
         `0D${chan}06010000000000000000000000000000${dev}${suffix}`;
     return [frame("00"), frame("01")];
 }

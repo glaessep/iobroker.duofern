@@ -103,7 +103,7 @@ export class DuoFernStick extends EventEmitter {
      * Initiates the stick initialization sequence.
      * 
      * @private
-     */    private onOpen() {
+     */    private onOpen(): void {
         this.emit('open');
         this.startInit();
     }
@@ -116,7 +116,7 @@ export class DuoFernStick extends EventEmitter {
      * @private
      * @param {Buffer} data - Raw data from serial port
      */
-    private handleData(data: Buffer) {
+    private handleData(data: Buffer): void {
         const hex = data.toString('hex').toUpperCase();
         this.buffer += hex;
 
@@ -140,7 +140,7 @@ export class DuoFernStick extends EventEmitter {
      * @private
      * @param {string} frame - Complete 44-character hex frame
      */
-    private handleFrame(frame: string) {
+    private handleFrame(frame: string): void {
         this.emit('log', 'debug', `RX: ${frame}`);
         this.emit('frame', frame);
 
@@ -194,7 +194,7 @@ export class DuoFernStick extends EventEmitter {
      * @async
      * @throws {Error} If initialization fails or times out
      */
-    private async startInit() {
+    private async startInit(): Promise<void> {
         try {
             this.emit('log', 'info', 'Starting DuoFern stick initialization...');
             this.emit('log', 'debug', 'Sending INIT1');
@@ -260,7 +260,7 @@ export class DuoFernStick extends EventEmitter {
                 reject(new Error(`Timeout waiting for ${stepName}`));
             }, 3000);
 
-            this.initResponseCallback = (frame) => {
+            this.initResponseCallback = (frame): void => {
                 clearTimeout(timeout);
                 this.initResponseCallback = null;
                 resolve(frame);
@@ -280,7 +280,7 @@ export class DuoFernStick extends EventEmitter {
      * @public
      * @param {string} cmd - 44-character hex command frame
      */
-    public write(cmd: string) {
+    public write(cmd: string): void {
         this.emit('log', 'debug', `Queuing command: ${cmd}`);
         this.queue.push(cmd);
         if (this.initialized && !this.isProcessingQueue) {
@@ -298,7 +298,7 @@ export class DuoFernStick extends EventEmitter {
      * @private
      * @param {string} cmd - 44-character hex command frame
      */
-    private writeRaw(cmd: string) {
+    private writeRaw(cmd: string): void {
         this.emit('log', 'debug', `TX: ${cmd}  (length: ${cmd.length})`);
         const buf = Buffer.from(cmd, 'hex');
         this.port.write(buf);
@@ -312,7 +312,7 @@ export class DuoFernStick extends EventEmitter {
      * 
      * @private
      */
-    private processQueue() {
+    private processQueue(): void {
         if (this.queue.length === 0) {
             this.emit('log', 'debug', 'Command queue empty');
             this.isProcessingQueue = false;
@@ -340,7 +340,7 @@ export class DuoFernStick extends EventEmitter {
      * 
      * @public
      */
-    public pair() {
+    public pair(): void {
         this.write(Protocol.duoStartPair);
     }
 
@@ -351,7 +351,7 @@ export class DuoFernStick extends EventEmitter {
      * 
      * @public
      */
-    public unpair() {
+    public unpair(): void {
         this.write(Protocol.duoStartUnpair);
     }
 
@@ -361,7 +361,7 @@ export class DuoFernStick extends EventEmitter {
      * @public
      * @param {string} code - 6-character hex device code to pair
      */
-    public remotePair(code: string) {
+    public remotePair(code: string): void {
         this.write(buildRemotePair(code));
     }
 

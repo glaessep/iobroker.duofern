@@ -13,6 +13,51 @@ export default [
         ]
     },
 
+    // Test files configuration - no project checking to keep tests independent
+    {
+        files: ['test/**/*.ts'],
+        languageOptions: {
+            parser: tsParser,
+            parserOptions: {
+                ecmaVersion: 2022,
+                sourceType: 'module'
+            },
+            globals: {
+                console: 'readonly',
+                process: 'readonly',
+                Buffer: 'readonly',
+                __dirname: 'readonly',
+                __filename: 'readonly',
+                module: 'readonly',
+                require: 'readonly',
+                exports: 'writable',
+                describe: 'readonly',
+                it: 'readonly',
+                before: 'readonly',
+                after: 'readonly',
+                beforeEach: 'readonly',
+                afterEach: 'readonly'
+            }
+        },
+        plugins: {
+            '@typescript-eslint': typescriptEslint
+        },
+        rules: {
+            '@typescript-eslint/no-unused-vars': [
+                'error',
+                {
+                    'ignoreRestSiblings': true,
+                    'argsIgnorePattern': '^_'
+                }
+            ],
+            '@typescript-eslint/explicit-function-return-type': 'warn',
+            '@typescript-eslint/no-explicit-any': 'warn',
+            '@typescript-eslint/no-non-null-assertion': 'warn',
+            'prefer-const': 'error',
+            'no-var': 'error'
+        }
+    },
+
     // TypeScript files configuration
     {
         files: ['**/*.ts'],
@@ -90,6 +135,14 @@ export default [
             'no-console': 'error',
             'prefer-const': 'error',
             'no-var': 'error'
+        }
+    },
+
+    // Scripts configuration - allow console
+    {
+        files: ['scripts/**/*.js'],
+        rules: {
+            'no-console': 'off'
         }
     }
 ];

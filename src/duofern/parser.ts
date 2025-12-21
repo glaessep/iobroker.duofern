@@ -70,9 +70,9 @@ const statusGroups: { [key: string]: number[] } = {
  * managed entirely by command logic when handling up/down/position
  * commands, rather than being derived from device status bytes.
  * 
- * @constant {Object.<string, any[]>} statusMapping
+ * @constant {Object.<string, (string | number)[]>} statusMapping
  */
-const statusMapping: { [key: string]: any[] } = {
+const statusMapping: { [key: string]: (string | number)[] } = {
     "onOff": ["off", "on"],
     "upDown": ["up", "down"],
     "moving": ["stop", "stop"],
@@ -167,17 +167,17 @@ const statusIds: { [key: number]: StatusIdDef } = {
  * 
  * @export
  * @param {string} frame - 44-character hex string status frame (format: 0FFF0F...)
- * @returns {Record<string, any>} Object with status field names as keys and parsed values
+ * @returns {Record<string, string | number>} Object with status field names as keys and parsed values
  * 
  * @example
  * const status = parseStatus('0FFF0F21...');
  * // Returns: { position: 50, moving: 'stop', sunAutomatic: 'on', ... }
  */
-export function parseStatus(frame: string): Record<string, any> {
+export function parseStatus(frame: string): Record<string, string | number> {
     // Frame format: 0FFF0F...
     // Byte 3 (index 6-7) is format
     const format = frame.substring(6, 8);
-    const result: Record<string, any> = {};
+    const result: Record<string, string | number> = {};
 
     // Default to channel 01 for now
     const chan = "01";

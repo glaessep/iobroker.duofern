@@ -20,7 +20,7 @@ import { getStateDefinitions } from './duofern/capabilities';
 interface DuoFernAdapterConfig {
     port: string;
     code: string;
-    [key: string]: any;
+    [key: string]: string | number | boolean | undefined;
 }
 
 /**
@@ -269,7 +269,7 @@ export class DuoFernAdapter extends utils.Adapter {
      * @private
      * @param {string} frame - The 44-character hex frame received from the stick
      */
-    private handleMessage(frame: string) {
+    private handleMessage(frame: string): void {
         this.log.debug(`Received message frame: ${frame}`);
         if (frame.startsWith("0FFF0F")) {
             const code = frame.substring(30, 36);
@@ -291,7 +291,7 @@ export class DuoFernAdapter extends utils.Adapter {
      * @param {string} frame - The pairing/unpairing frame (0602... or 0603...)
      * @param {boolean} paired - True if device was paired, false if unpaired
      */
-    private async handlePairing(frame: string, paired: boolean) {
+    private async handlePairing(frame: string, paired: boolean): Promise<void> {
         // 0602... or 0603...
         // Code is at 30,6?
         const code = frame.substring(30, 36);
@@ -316,9 +316,9 @@ export class DuoFernAdapter extends utils.Adapter {
      * @private
      * @async
      * @param {string} code - The 6-digit hex device code
-     * @param {any} status - Object containing status key-value pairs from parsed frame
+     * @param {Record<string, string | number | boolean>} status - Object containing status key-value pairs from parsed frame
      */
-    private async updateDeviceStates(code: string, status: any) {
+    private async updateDeviceStates(code: string, status: Record<string, string | number | boolean>): Promise<void> {
         await this.setObjectNotExistsAsync(code, {
             type: 'device',
             common: {
@@ -537,7 +537,7 @@ export class DuoFernAdapter extends utils.Adapter {
             }
 
             // Check if stick is ready before sending commands
-            if (!(this.stick as any).initialized) {
+            if (!(this.stick as unknown as { initialized: boolean }).initialized) {
                 this.log.warn('Stick not fully initialized yet, command queued');
                 // Command will still be queued in stick.write()
             }
@@ -746,7 +746,7 @@ function startAdapter(options: Partial<utils.AdapterOptions> | undefined): DuoFe
 
 if (require.main !== module) {
     // Export using the pattern ioBroker expects
-    module.exports = (options: Partial<utils.AdapterOptions> | undefined) => new DuoFernAdapter(options);
+    module.exports = (options: Partial<utils.AdapterOptions> | undefined): DuoFernAdapter => new DuoFernAdapter(options);
 } else {
     // Manual start for testing
     startAdapter(undefined);
