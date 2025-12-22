@@ -165,7 +165,8 @@ describe('DuoFern Parser', () => {
 
             if ('ventilatingPosition' in result) {
                 // With all zeros, inverted values should be at maximum (100)
-                assert.ok(result.ventilatingPosition >= 0 && result.ventilatingPosition <= 100);
+                const pos = result.ventilatingPosition;
+                assert.ok(typeof pos === 'number' && pos >= 0 && pos <= 100);
             }
         });
 

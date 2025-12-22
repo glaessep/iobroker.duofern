@@ -1,8 +1,12 @@
 {
     "common": {
         "name": "duofern",
-        "version": "0.4.0",
+        "version": "0.4.1",
         "news": {
+            "0.4.1": {
+                "en": "Refactored state command definitions to protocol layer for improved code organization and single source of truth",
+                "de": "Zustandsbefehldefinitionen zur Protokollschicht refaktoriert für verbesserte Code-Organisation und Single Source of Truth"
+            },
             "0.3.4": {
                 "en": "Fix device name preservation - names are no longer overwritten when adapter is redeployed",
                 "de": "Gerätename-Erhaltung korrigiert - Namen werden nicht mehr überschrieben wenn der Adapter neu bereitgestellt wird"

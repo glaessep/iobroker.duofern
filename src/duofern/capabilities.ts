@@ -89,18 +89,20 @@ const COMMAND_NAMES: Record<string, string> = {
  * Device type categories based on first two hex digits of device code.
  * Determines which capabilities are available for each device type.
  */
-const DEVICE_TYPE_CATEGORIES: Record<string, 'blinds' | 'gate' | 'actuator' | 'dimmer' | 'sensor' | 'thermostat' | 'remote' | 'unknown'> = {
-    // Roller shutters and blinds
+const DEVICE_TYPE_CATEGORIES: Record<string, 'blinds' | 'venetianBlinds' | 'gate' | 'actuator' | 'dimmer' | 'sensor' | 'thermostat' | 'remote' | 'unknown'> = {
+    // Roller shutters and blinds (simple, no slat control)
     '40': 'blinds', // RolloTron Standard
     '41': 'blinds', // RolloTron Comfort Slave
-    '42': 'blinds', // Rohrmotor-Aktor
     '47': 'blinds', // Rohrmotor Steuerung
     '49': 'blinds', // Rohrmotor
-    '4B': 'blinds', // Connect-Aktor (has blinds mode support)
-    '4C': 'blinds', // Troll Basis
     '61': 'blinds', // RolloTron Comfort Master
     '62': 'blinds', // Unspecified device type
-    '70': 'blinds', // Troll Comfort DuoFern
+
+    // Venetian blinds (with slat/tilt control)
+    '42': 'venetianBlinds', // Rohrmotor-Aktor
+    '4B': 'venetianBlinds', // Connect-Aktor
+    '4C': 'venetianBlinds', // Troll Basis
+    '70': 'venetianBlinds', // Troll Comfort DuoFern
 
     // Gates and garage doors
     '4E': 'gate', // SX5 Gate Controller
@@ -472,10 +474,18 @@ export function getDeviceStateDefinitions(deviceCode: string): Record<string, St
             'moving', 'sunAutomatic', 'timeAutomatic', 'duskAutomatic', 'dawnAutomatic',
             'manualMode', 'runningTime', 'sunPosition', 'ventilatingPosition', 'ventilatingMode',
             'sunMode', 'rainAutomatic', 'windAutomatic', 'reversal', 'rainDirection', 'windDirection',
-            // Advanced blind features (venetian blinds)
-            'slatRunTime', 'tiltAfterMoveLevel', 'tiltInVentPos', 'defaultSlatPos',
-            'tiltAfterStopDown', 'motorDeadTime', 'tiltInSunPos', 'slatPosition', 'blindsMode',
             'windMode', 'rainMode'
+        ],
+        'venetianBlinds': [
+            // All basic blind capabilities
+            'up', 'down', 'stop', 'toggle', 'position',
+            'moving', 'sunAutomatic', 'timeAutomatic', 'duskAutomatic', 'dawnAutomatic',
+            'manualMode', 'runningTime', 'sunPosition', 'ventilatingPosition', 'ventilatingMode',
+            'sunMode', 'rainAutomatic', 'windAutomatic', 'reversal', 'rainDirection', 'windDirection',
+            'windMode', 'rainMode',
+            // Plus venetian blind specific features (slat control)
+            'slatRunTime', 'tiltAfterMoveLevel', 'tiltInVentPos', 'defaultSlatPos',
+            'tiltAfterStopDown', 'motorDeadTime', 'tiltInSunPos', 'slatPosition', 'blindsMode'
         ],
         'gate': [
             // Basic movement (gates/garage doors)

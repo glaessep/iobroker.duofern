@@ -248,9 +248,56 @@ describe('capabilities', () => {
 
             // Remotes should have minimal states for status/pairing only
             assert.ok(remoteDefs.getStatus, 'Remotes should have getStatus for battery status');
-            assert.ok(remoteDefs.remotePair, 'Remotes should have remotePair');
-            assert.ok(!remoteDefs.position, 'Remotes should NOT have position');
+            assert.ok(remoteDefs.remotePair, 'Remotes should have remotePair for pairing other devices');
             assert.ok(!remoteDefs.up, 'Remotes should NOT have up');
+            assert.ok(!remoteDefs.position, 'Remotes should NOT have position');
+            assert.ok(!remoteDefs.on, 'Remotes should NOT have on/off');
+
+            // Common states should be available to all
+            assert.ok(blindsDefs.getStatus, 'All devices should have getStatus');
+            assert.ok(gateDefs.getStatus, 'All devices should have getStatus');
+            assert.ok(sensorDefs.getStatus, 'All devices should have getStatus');
+        });
+
+        it('should only include venetian blind features for devices that support blindsMode', () => {
+            // Devices that support venetian blind features (slat control)
+            const venetianDevices = {
+                '42': 'Rohrmotor-Aktor',
+                '4B': 'Connect-Aktor',
+                '4C': 'Troll Basis',
+                '70': 'Troll Comfort DuoFern'
+            };
+
+            // Regular blind devices without venetian blind support
+            const regularBlindDevices = {
+                '40': 'RolloTron Standard',
+                '41': 'RolloTron Comfort Slave',
+                '47': 'Rohrmotor Steuerung',
+                '49': 'Rohrmotor',
+                '61': 'RolloTron Comfort Master',
+                '62': 'Unspecified device'
+            };
+
+            const venetianStates = [
+                'slatRunTime', 'tiltAfterMoveLevel', 'tiltInVentPos', 'defaultSlatPos',
+                'tiltAfterStopDown', 'motorDeadTime', 'tiltInSunPos', 'slatPosition', 'blindsMode'
+            ];
+
+            // Test venetian blind devices - should have slat states
+            for (const [code, name] of Object.entries(venetianDevices)) {
+                const defs = getDeviceStateDefinitions(`${code}1234`);
+                for (const state of venetianStates) {
+                    assert.ok(defs[state], `${name} (${code}) should have ${state}`);
+                }
+            }
+
+            // Test regular blind devices - should NOT have slat states
+            for (const [code, name] of Object.entries(regularBlindDevices)) {
+                const defs = getDeviceStateDefinitions(`${code}1234`);
+                for (const state of venetianStates) {
+                    assert.ok(!defs[state], `${name} (${code}) should NOT have ${state}`);
+                }
+            }
         });
 
         it('should work with different device type codes', () => {
