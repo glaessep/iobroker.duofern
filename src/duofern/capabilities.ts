@@ -475,7 +475,9 @@ export function getDeviceStateDefinitions(deviceCode: string): Record<string, St
             'moving', 'sunAutomatic', 'timeAutomatic', 'duskAutomatic', 'dawnAutomatic',
             'manualMode', 'runningTime', 'sunPosition', 'ventilatingPosition', 'ventilatingMode',
             'sunMode', 'rainAutomatic', 'windAutomatic', 'reversal', 'rainDirection', 'windDirection',
-            'windMode', 'rainMode'
+            'windMode', 'rainMode',
+            // Safety indicators
+            'obstacle', 'block'
         ],
         'venetianBlinds': [
             // All basic blind capabilities
@@ -484,6 +486,8 @@ export function getDeviceStateDefinitions(deviceCode: string): Record<string, St
             'manualMode', 'runningTime', 'sunPosition', 'ventilatingPosition', 'ventilatingMode',
             'sunMode', 'rainAutomatic', 'windAutomatic', 'reversal', 'rainDirection', 'windDirection',
             'windMode', 'rainMode',
+            // Safety indicators
+            'obstacle', 'block',
             // Plus venetian blind specific features (slat control)
             'slatRunTime', 'tiltAfterMoveLevel', 'tiltInVentPos', 'defaultSlatPos',
             'tiltAfterStopDown', 'motorDeadTime', 'tiltInSunPos', 'slatPosition', 'blindsMode'

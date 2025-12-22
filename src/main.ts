@@ -96,7 +96,7 @@ export class DuoFernAdapter extends utils.Adapter {
     private isReInitializing: boolean = false;
     private registrationThrottleTimer: NodeJS.Timeout | null = null;
     private pendingDeviceRegistrations: Set<string> = new Set();
-    private readonly REGISTRATION_THROTTLE_MS = 10000; // 10 seconds
+    private readonly REGISTRATION_THROTTLE_MS = 2000; // 2 seconds - restarts on each new device
     private registrationRetryCount: number = 0;
     private readonly MAX_REGISTRATION_RETRIES = 3;
 
@@ -323,27 +323,30 @@ export class DuoFernAdapter extends utils.Adapter {
     }
 
     /**
-     * Schedules device registration with throttling to collect multiple devices.
+     * Schedules device registration with adaptive throttling to collect multiple devices.
      * 
      * Instead of immediately re-initializing when a new device appears, this method
-     * collects devices over a `this.REGISTRATION_THROTTLE_MS` window. If more devices appear during this time,
-     * the timer is reset. Once the window expires, all pending devices are registered
-     * in a single re-initialization.
+     * collects devices over a `this.REGISTRATION_THROTTLE_MS` window (2 seconds).
+     * The timer is restarted each time a new device is discovered, ensuring we wait
+     * a maximum of 2 seconds after the LAST device before re-initialization.
+     * Once the window expires, all pending devices are registered in a single
+     * re-initialization along with all already paired devices.
      * 
      * @private
      * @param {string} deviceCode - The 6-digit hex device code to register
      */
     private scheduleDeviceRegistration(deviceCode: string): void {
-        // Clear existing timer if present
+        // Clear existing timer if present (restart on each new device)
         if (this.registrationThrottleTimer) {
             clearTimeout(this.registrationThrottleTimer);
+            this.log.debug('Timer restarted due to new device discovery');
         }
 
         const normalizedCode = deviceCode.toUpperCase();
         this.pendingDeviceRegistrations.add(normalizedCode);
 
         const deviceCount = this.pendingDeviceRegistrations.size;
-        this.log.info(`Scheduled registration for ${normalizedCode} (${deviceCount} device${deviceCount > 1 ? 's' : ''} pending)`);
+        this.log.info(`Scheduled registration for ${normalizedCode} (${deviceCount} device${deviceCount > 1 ? 's' : ''} pending, timer restarted)`);
 
         // Set new timer
         this.registrationThrottleTimer = setTimeout(() => {
@@ -388,6 +391,7 @@ export class DuoFernAdapter extends utils.Adapter {
             this.isReInitializing = true;
 
             // Add all pending devices to registered set
+            // IMPORTANT: registeredDevices contains ALL devices (newly discovered + already paired)
             devicesToRegister.forEach(code => this.registeredDevices.add(code));
 
             // Clear pending set
@@ -397,7 +401,7 @@ export class DuoFernAdapter extends utils.Adapter {
             this.log.info(`Re-initializing stick with ${this.registeredDevices.size} total devices`);
             this.log.debug(`Device list: ${Array.from(this.registeredDevices).join(', ')}`);
 
-            // Re-initialize stick with updated device list
+            // Re-initialize stick with complete device list (newly discovered + already paired)
             await this.stick.reopen(Array.from(this.registeredDevices));
 
             this.log.info(`Stick re-initialized successfully with ${devicesToRegister.length} new device(s)`);
