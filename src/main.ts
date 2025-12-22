@@ -223,7 +223,8 @@ export class DuoFernAdapter extends utils.Adapter {
 
         this.stick.on('initialized', () => {
             this.log.info('DuoFern stick initialized successfully');
-            this.log.debug(`Stick ready with ${knownDevices.length} known devices: ${knownDevices.join(', ')}`);
+            const currentDevices = Array.from(this.registeredDevices);
+            this.log.debug(`Stick ready with ${currentDevices.length} registered device(s): ${currentDevices.join(', ')}`);
             this.updateConnectionStatus();
             this.isReInitializing = false;
         });
