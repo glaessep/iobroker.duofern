@@ -9,8 +9,9 @@
 import * as utils from '@iobroker/adapter-core';
 import { DuoFernStick } from './duofern/stick';
 import { parseStatus } from './duofern/parser';
-import { buildCommand, buildRemotePairFrames, buildStatusRequest, buildBroadcastStatusRequest, Commands } from './duofern/protocol';
-import { getDeviceStateDefinitions } from './duofern/capabilities';
+import { buildBroadcastStatusRequest, buildRemotePairFrames } from './duofern/protocol';
+import { getDeviceStateDefinitions, getDeviceTypeName } from './duofern/capabilities';
+import { CommandDispatcher } from './duofern/commandDispatcher';
 
 /**
  * Configuration interface for the DuoFern adapter.
@@ -22,57 +23,6 @@ interface DuoFernAdapterConfig {
     code: string;
     [key: string]: string | number | boolean | undefined;
 }
-
-/**
- * Maps DuoFern device type codes (first two hex digits of device code) to human-readable device names.
- * 
- * This mapping is defined based on the FHEM DuoFern module and represents known DuoFern device types.
- * Currently unused but reserved for future features such as:
- * - Displaying device types in the UI
- * - Automatic device capability detection
- * - Device-specific state/command configurations
- * 
- * Source: https://wiki.fhem.de/wiki/Rademacher_DuoFern
- */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const DEVICE_TYPES: { [key: string]: string } = {
-    "40": "RolloTron Standard",
-    "41": "RolloTron Comfort Slave",
-    "42": "Rohrmotor-Aktor",
-    "43": "Universalaktor",
-    "46": "Steckdosenaktor",
-    "47": "Rohrmotor Steuerung",
-    "48": "Dimmaktor",
-    "49": "Rohrmotor",
-    "4A": "Dimmer",
-    "4B": "Connect-Aktor",
-    "4C": "Troll Basis",
-    "4E": "SX5",
-    "61": "RolloTron Comfort Master",
-    "62": "Unspecified device type (62)",
-    "65": "Bewegungsmelder",
-    "69": "Umweltsensor",
-    "70": "Troll Comfort DuoFern",
-    "71": "Troll Comfort DuoFern Light",
-    "73": "Raumthermostat",
-    "74": "Wandtaster 6fach",
-    "A0": "Handsender 6G48",
-    "A1": "Handsender 1G48",
-    "A2": "Handsender 6G1",
-    "A3": "Handsender 1G1",
-    "A4": "Wandtaster",
-    "A5": "Sonnensensor",
-    "A7": "Funksender UP",
-    "A8": "HomeTimer",
-    "A9": "Sonnen-/Windsensor",
-    "AA": "Markisenwaechter",
-    "AB": "Rauchmelder",
-    "AC": "Fenster-Tuer-Kontakt",
-    "AD": "Wandtaster 6fach Bat",
-    "AF": "Sonnensensor",
-    "E0": "Handzentrale",
-    "E1": "Heizkoerperantrieb",
-};
 
 /**
  * Main adapter class for ioBroker DuoFern integration.
@@ -388,7 +338,8 @@ export class DuoFernAdapter extends utils.Adapter {
         }
 
         const devicesToRegister = Array.from(this.pendingDeviceRegistrations);
-        this.log.info(`Processing registration for ${devicesToRegister.length} device(s): ${devicesToRegister.join(', ')} (attempt ${this.registrationRetryCount + 1}/${this.MAX_REGISTRATION_RETRIES})`);
+        const attemptNumber = this.registrationRetryCount + 1;
+        this.log.info(`Processing registration for ${devicesToRegister.length} device(s): ${devicesToRegister.join(', ')} (attempt ${attemptNumber}/${this.MAX_REGISTRATION_RETRIES})`);
 
         try {
             this.isReInitializing = true;
@@ -413,6 +364,7 @@ export class DuoFernAdapter extends utils.Adapter {
             this.registrationRetryCount = 0;
         } catch (err) {
             this.log.error(`Failed to re-initialize stick (attempt ${this.registrationRetryCount + 1}/${this.MAX_REGISTRATION_RETRIES}): ${err}`);
+            // Reset flag to prevent permanent blocking
             this.isReInitializing = false;
             // Remove failed devices from registered list
             devicesToRegister.forEach(code => this.registeredDevices.delete(code));
@@ -500,7 +452,7 @@ export class DuoFernAdapter extends utils.Adapter {
         });
         await this.setState(`${code}.code`, code, true);
 
-        // Create editable name property
+        // Create editable name property with human-readable default
         await this.setObjectNotExistsAsync(`${code}.name`, {
             type: 'state',
             common: {
@@ -509,7 +461,7 @@ export class DuoFernAdapter extends utils.Adapter {
                 role: 'text',
                 read: true,
                 write: true,
-                def: 'user-defined name',
+                def: getDeviceTypeName(code),
             },
             native: {},
         });
@@ -696,163 +648,64 @@ export class DuoFernAdapter extends utils.Adapter {
             }
 
             // Check if stick is ready before sending commands
-            if (!(this.stick as unknown as { initialized: boolean }).initialized) {
+            if (!this.stick.isInitialized) {
                 this.log.warn('Stick not fully initialized yet, command queued');
                 // Command will still be queued in stick.write()
             }
 
             this.log.debug(`State change: ${id} = ${state.val}`);
 
-            // Build frame options for all device commands
-            const frameOpts = {
-                deviceCode: deviceId.toUpperCase(),
-                stickCode: this.config.code.toUpperCase(),
-                channel: "01",
-                suffix: "00",
-            };
+            // Use CommandDispatcher to execute the command
+            const result = CommandDispatcher.executeCommand(
+                deviceId.toUpperCase(),
+                this.config.code.toUpperCase(),
+                command,
+                state.val
+            );
 
-            this.log.debug(`Built frameOpts: ${JSON.stringify(frameOpts)}`);
+            if (result.success) {
+                // Handle single frame commands
+                if (result.frame) {
+                    this.log.info(`Sending ${command} command to device ${deviceId}`);
+                    this.log.debug(`Built command: ${result.frame}`);
+                    this.stick.write(result.frame);
 
-            if (command === 'up') {
-                if (state.val === true) {
-                    this.log.info(`Sending UP command to device ${deviceId}`);
-                    const cmd = buildCommand(Commands.up, {}, frameOpts);
-                    this.log.debug(`Built command: ${cmd}`);
-                    this.stick.write(cmd);
-                    // Update moving state immediately after sending command
-                    await this.setState(`${deviceId}.moving`, 'up', true);
-                    // Reset button state after 1 second
-                    this.resetButtonState(`${deviceId}.up`);
-                } else {
-                    this.log.debug(`Ignoring UP command for device ${deviceId} - state is not true`);
-                }
-            } else if (command === 'down') {
-                if (state.val === true) {
-                    this.log.info(`Sending DOWN command to device ${deviceId}`);
-                    const cmd = buildCommand(Commands.down, {}, frameOpts);
-                    this.log.debug(`Built command: ${cmd}`);
-                    this.stick.write(cmd);
-                    // Update moving state immediately after sending command
-                    await this.setState(`${deviceId}.moving`, 'down', true);
-                    // Reset button state after 1 second
-                    this.resetButtonState(`${deviceId}.down`);
-                } else {
-                    this.log.debug(`Ignoring DOWN command for device ${deviceId} - state is not true`);
-                }
-            } else if (command === 'stop') {
-                if (state.val === true) {
-                    this.log.info(`Sending STOP command to device ${deviceId}`);
-                    const cmd = buildCommand(Commands.stop, {}, frameOpts);
-                    this.log.debug(`Built command: ${cmd}`);
-                    this.stick.write(cmd);
-                    // Update moving state immediately after sending command
-                    await this.setState(`${deviceId}.moving`, 'stop', true);
-                    // Reset button state after 1 second
-                    this.resetButtonState(`${deviceId}.stop`);
-                } else {
-                    this.log.debug(`Ignoring STOP command for device ${deviceId} - state is not true`);
-                }
-            } else if (command === 'toggle') {
-                if (state.val === true) {
-                    this.log.info(`Sending TOGGLE command to device ${deviceId}`);
-                    const cmd = buildCommand(Commands.toggle, {}, frameOpts);
-                    this.log.debug(`Built command: ${cmd}`);
-                    this.stick.write(cmd);
-                    // Update moving state immediately after sending command
-                    const currentPosition = await this.getStateAsync(`${deviceId}.position`);
-                    if (currentPosition && typeof currentPosition.val === 'number' && currentPosition.val >= 0) {
-                        await this.setState(`${deviceId}.moving`, 'moving', true);
+                    // Handle moving state updates for movement commands
+                    if (command === 'up') {
+                        await this.setState(`${deviceId}.moving`, 'up', true);
+                    } else if (command === 'down') {
+                        await this.setState(`${deviceId}.moving`, 'down', true);
+                    } else if (command === 'stop') {
+                        await this.setState(`${deviceId}.moving`, 'stop', true);
+                    } else if (command === 'position' && typeof state.val === 'number') {
+                        // Update moving state based on target vs current position
+                        const currentPosition = await this.getStateAsync(`${deviceId}.position`);
+                        const currentVal = currentPosition?.val as number || 0;
+                        if (state.val > currentVal) {
+                            await this.setState(`${deviceId}.moving`, 'down', true);
+                        } else if (state.val < currentVal) {
+                            await this.setState(`${deviceId}.moving`, 'up', true);
+                        } else {
+                            await this.setState(`${deviceId}.moving`, 'stop', true);
+                        }
                     }
-                    // Reset button state after 1 second
-                    this.resetButtonState(`${deviceId}.toggle`);
-                } else {
-                    this.log.debug(`Ignoring TOGGLE command for device ${deviceId} - state is not true`);
                 }
-            } else if (command === 'position') {
-                const val = state.val as number;
-                this.log.info(`Sending POSITION command to device ${deviceId}: ${val}%`);
-                const cmd = buildCommand(Commands.position, { nn: val }, frameOpts);
-                this.log.debug(`Built command: ${cmd}`);
-                this.stick.write(cmd);
-                // Update moving state based on target vs current position
-                const currentPosition = await this.getStateAsync(`${deviceId}.position`);
-                const currentVal = currentPosition?.val as number || 0;
-                if (val > currentVal) {
-                    await this.setState(`${deviceId}.moving`, 'down', true);
-                } else if (val < currentVal) {
-                    await this.setState(`${deviceId}.moving`, 'up', true);
-                } else {
-                    await this.setState(`${deviceId}.moving`, 'stop', true);
-                }
-            } else if (command === 'sunMode') {
-                this.log.info(`Sending SUN MODE ${state.val ? 'ON' : 'OFF'} command to device ${deviceId}`);
-                const cmd = buildCommand(state.val ? Commands.sunModeOn : Commands.sunModeOff, {}, frameOpts);
-                this.log.debug(`Built command: ${cmd}`);
-                this.stick.write(cmd);
-            } else if (command === 'manualMode') {
-                this.log.info(`Sending MANUAL MODE ${state.val ? 'ON' : 'OFF'} command to device ${deviceId}`);
-                const cmd = buildCommand(state.val ? Commands.manualModeOn : Commands.manualModeOff, {}, frameOpts);
-                this.log.debug(`Built command: ${cmd}`);
-                this.stick.write(cmd);
-            } else if (command === 'timeAutomatic') {
-                this.log.info(`Sending TIME AUTOMATIC ${state.val ? 'ON' : 'OFF'} command to device ${deviceId}`);
-                const cmd = buildCommand(state.val ? Commands.timeAutomaticOn : Commands.timeAutomaticOff, {}, frameOpts);
-                this.log.debug(`Built command: ${cmd}`);
-                this.stick.write(cmd);
-            } else if (command === 'sunAutomatic') {
-                this.log.info(`Sending SUN AUTOMATIC ${state.val ? 'ON' : 'OFF'} command to device ${deviceId}`);
-                const cmd = buildCommand(state.val ? Commands.sunAutomaticOn : Commands.sunAutomaticOff, {}, frameOpts);
-                this.log.debug(`Built command: ${cmd}`);
-                this.stick.write(cmd);
-            } else if (command === 'dawnAutomatic') {
-                this.log.info(`Sending DAWN AUTOMATIC ${state.val ? 'ON' : 'OFF'} command to device ${deviceId}`);
-                const cmd = buildCommand(state.val ? Commands.dawnAutomaticOn : Commands.dawnAutomaticOff, {}, frameOpts);
-                this.log.debug(`Built command: ${cmd}`);
-                this.stick.write(cmd);
-            } else if (command === 'duskAutomatic') {
-                this.log.info(`Sending DUSK AUTOMATIC ${state.val ? 'ON' : 'OFF'} command to device ${deviceId}`);
-                const cmd = buildCommand(state.val ? Commands.duskAutomaticOn : Commands.duskAutomaticOff, {}, frameOpts);
-                this.log.debug(`Built command: ${cmd}`);
-                this.stick.write(cmd);
-            } else if (command === 'rainAutomatic') {
-                this.log.info(`Sending RAIN AUTOMATIC ${state.val ? 'ON' : 'OFF'} command to device ${deviceId}`);
-                const cmd = buildCommand(state.val ? Commands.rainAutomaticOn : Commands.rainAutomaticOff, {}, frameOpts);
-                this.log.debug(`Built command: ${cmd}`);
-                this.stick.write(cmd);
-            } else if (command === 'windAutomatic') {
-                this.log.info(`Sending WIND AUTOMATIC ${state.val ? 'ON' : 'OFF'} command to device ${deviceId}`);
-                const cmd = buildCommand(state.val ? Commands.windAutomaticOn : Commands.windAutomaticOff, {}, frameOpts);
-                this.log.debug(`Built command: ${cmd}`);
-                this.stick.write(cmd);
-            } else if (command === 'ventilatingMode') {
-                this.log.info(`Sending VENTILATING MODE ${state.val ? 'ON' : 'OFF'} command to device ${deviceId}`);
-                const cmd = buildCommand(state.val ? Commands.ventilatingModeOn : Commands.ventilatingModeOff, {}, frameOpts);
-                this.log.debug(`Built command: ${cmd}`);
-                this.stick.write(cmd);
-            } else if (command === 'getStatus') {
-                if (state.val === true) {
-                    this.log.info(`Sending STATUS REQUEST to device ${deviceId}`);
-                    const cmd = buildStatusRequest(deviceId);
-                    this.log.debug(`Built status request: ${cmd}`);
-                    this.stick.write(cmd);
-                    // Reset button state after 1 second
-                    this.resetButtonState(`${deviceId}.getStatus`);
-                } else {
-                    this.log.debug(`Ignoring STATUS REQUEST for device ${deviceId} - state is not true`);
-                }
-            } else if (command === 'remotePair') {
-                if (state.val === true) {
-                    this.log.info(`Sending REMOTE PAIR to device ${deviceId}`);
-                    const frames = buildRemotePairFrames(deviceId);
-                    frames.forEach((f) => {
-                        this.log.debug(`Built remote pair frame: ${f}`);
-                        this.stick?.write(f);
+
+                // Handle multi-frame commands
+                if (result.frames) {
+                    this.log.info(`Sending ${command} command to device ${deviceId} (${result.frames.length} frames)`);
+                    result.frames.forEach((frame) => {
+                        this.log.debug(`Built command frame: ${frame}`);
+                        this.stick?.write(frame);
                     });
-                    // Reset button state after 1 second
-                    this.resetButtonState(`${deviceId}.remotePair`);
-                } else {
-                    this.log.debug(`Ignoring REMOTE PAIR command for device ${deviceId} - state is not true`);
                 }
+
+                // Reset button state if needed
+                if (result.shouldResetButton) {
+                    this.resetButtonState(`${deviceId}.${command}`);
+                }
+            } else {
+                this.log.error(`Failed to execute command ${command} for device ${deviceId}: ${result.error}`);
             }
         }
     }

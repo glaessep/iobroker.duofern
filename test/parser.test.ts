@@ -111,7 +111,7 @@ describe('DuoFern Parser', () => {
             const frame = '0FFF0F21' + 'FF'.repeat(9);
             const result = parseStatus(frame);
 
-            // Verify that mapped fields are present and are booleans
+            // Verify that onOff-mapped fields return boolean values (true/false)
             const hasBoolean = Object.entries(result).some(([key, val]) =>
                 typeof val === 'boolean'
             );

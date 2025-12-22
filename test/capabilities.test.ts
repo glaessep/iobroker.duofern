@@ -63,6 +63,36 @@ describe('capabilities', () => {
             assert.ok(definitions.sunMode);
         });
 
+        it('should include mode commands (sunMode, windMode, rainMode)', () => {
+            const definitions = getStateDefinitions();
+
+            // Mode commands should exist
+            assert.ok(definitions.sunMode, 'sunMode should exist');
+            assert.ok(definitions.windMode, 'windMode should exist');
+            assert.ok(definitions.rainMode, 'rainMode should exist');
+
+            // Verify sunMode properties
+            assert.strictEqual(definitions.sunMode.name, 'Sun Mode');
+            assert.strictEqual(definitions.sunMode.type, 'boolean');
+            assert.strictEqual(definitions.sunMode.role, 'state');
+            assert.strictEqual(definitions.sunMode.readable, true);
+            assert.strictEqual(definitions.sunMode.writable, true);
+
+            // Verify windMode properties
+            assert.strictEqual(definitions.windMode.name, 'Wind Mode');
+            assert.strictEqual(definitions.windMode.type, 'boolean');
+            assert.strictEqual(definitions.windMode.role, 'state');
+            assert.strictEqual(definitions.windMode.readable, true);
+            assert.strictEqual(definitions.windMode.writable, true);
+
+            // Verify rainMode properties
+            assert.strictEqual(definitions.rainMode.name, 'Rain Mode');
+            assert.strictEqual(definitions.rainMode.type, 'boolean');
+            assert.strictEqual(definitions.rainMode.role, 'state');
+            assert.strictEqual(definitions.rainMode.readable, true);
+            assert.strictEqual(definitions.rainMode.writable, true);
+        });
+
         it('should handle status fields without mapping (defaults to number type)', () => {
             const definitions = getStateDefinitions();
 
@@ -230,7 +260,6 @@ describe('capabilities', () => {
         });
 
         it('should return device-specific filtered definitions', () => {
-            const allDefs = getStateDefinitions();
             const blindsDefs = getDeviceStateDefinitions('401234'); // RolloTron Standard (blinds)
             const gateDefs = getDeviceStateDefinitions('4E1234'); // SX5 (gate)
             const tubularDefs = getDeviceStateDefinitions('491234'); // Rohrmotor (tubular motor - blinds)

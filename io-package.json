@@ -4,12 +4,8 @@
         "version": "0.5.5",
         "news": {
             "0.5.5": {
-                "en": "Comprehensive testing coverage with NYC configuration, improved device registration reliability, and enhanced validation for serial port and DuoFern stick code",
-                "de": "Umfassende Testabdeckung mit NYC-Konfiguration, verbesserte Zuverlässigkeit der Geräteregistrierung und erweiterte Validierung für serielle Schnittstelle und DuoFern-Stick-Code"
-            },
-            "0.4.1": {
-                "en": "Refactored state command definitions to protocol layer for improved code organization and single source of truth",
-                "de": "Zustandsbefehldefinitionen zur Protokollschicht refaktoriert für verbesserte Code-Organisation und Single Source of Truth"
+                "en": "Comprehensive testing coverage with NYC configuration, improved device registration reliability, and enhanced validation for serial port and DuoFern stick code. Refactored state command definitions to protocol layer for improved code organization and single source of truth",
+                "de": "Umfassende Testabdeckung mit NYC-Konfiguration, verbesserte Zuverlässigkeit der Geräteregistrierung und erweiterte Validierung für serielle Schnittstelle und DuoFern-Stick-Code. Zustandsbefehldefinitionen zur Protokollschicht refaktoriert für verbesserte Code-Organisation und Single Source of Truth"
             },
             "0.4.0": {
                 "en": "Device capability definitions moved to dedicated module, improved device categorization, and device-type-specific state filtering",

@@ -165,6 +165,11 @@ const statusIds: { [key: number]: StatusIdDef } = {
  * the frame format byte. Each status value is extracted using bit manipulation,
  * then optionally inverted and/or mapped to human-readable values.
  * 
+ * Note: While this function returns parsed status fields from device frames,
+ * callers (e.g., updateDeviceStates in main.ts) may pass additional fields
+ * beyond the parsed status, such as 'paired: true' for pairing events.
+ * The return type includes these possible extensions.
+ * 
  * @export
  * @param {string} frame - 44-character hex string status frame (format: 0FFF0F...)
  * @returns {Record<string, string | number | boolean>} Object with status field names as keys and parsed values

@@ -20,7 +20,7 @@
             "sm": 12,
             "md": 6,
             "lg": 4,
-            "validator": "data.code && /^6[Ff][0-9A-Fa-f]{4}$/.test(data.code)",
+            "validator": "data.code != null && /^6[Ff][0-9A-Fa-f]{4}$/.test(data.code)",
             "validatorErrorText": "Must be exactly 6 hex digits starting with 6F (e.g., 6F1A2B)",
             "validatorNoSaveOnError": true
         }

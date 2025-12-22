@@ -97,6 +97,7 @@ export const Commands = {
     ventilatingPosition: "080200nn", // 4 bytes: 08 02 00 nn
     ventilatingModeOn: "080200FD",
     ventilatingModeOff: "080200FE",
+    slatPosition: "071B00nn",      // 4 bytes: 07 1B 00 nn (nn = position 00-64 hex = 0-100%)
 
 };
 

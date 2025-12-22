@@ -12,12 +12,14 @@
  * - Support device-specific capability filtering (future enhancement)
  */
 
+import { Commands } from './protocol';
+
 
 /**
  * Defines metadata for a device state or command.
  * 
  * This interface describes all properties needed to create ioBroker state objects,
- * including type information, access permissions, and optional constraints.
+ * including type information, access permissions, optional constraints, and protocol command mapping.
  * 
  * @interface StateDefinition
  */
@@ -45,44 +47,64 @@ export interface StateDefinition {
 
     /** Optional maximum value for numeric states */
     max?: number;
+
+    /** 
+     * Protocol command mapping for writable states.
+     * Defines how state changes map to DuoFern protocol commands.
+     * Command type is derived from role: button→button, level→numericLevel, state+boolean→booleanToggle
+     */
+    commandMapping?: {
+        /** Protocol command for true/on state or button press */
+        commandOn?: string;
+        /** Protocol command for false/off state */
+        commandOff?: string;
+        /** Protocol command template with placeholders (e.g., "070700nn") */
+        commandTemplate?: string;
+    };
 }
 
 /**
- * Mapping of command names to their display labels.
- * These are user-friendly names shown in the ioBroker UI.
+ * Human-readable device type names based on first two hex digits of device code.
+ * Used for generating user-friendly default device names.
+ * Source: https://wiki.fhem.de/wiki/Rademacher_DuoFern
  */
-const COMMAND_NAMES: Record<string, string> = {
-    up: 'Up',
-    down: 'Down',
-    stop: 'Stop',
-    position: 'Position',
-    toggle: 'Toggle',
-    remotePair: 'Remote Pair',
-    statusRequest: 'Get Status',
-    sunModeOn: 'Sun Mode On',
-    sunModeOff: 'Sun Mode Off',
-    windModeOn: 'Wind Mode On',
-    windModeOff: 'Wind Mode Off',
-    rainModeOn: 'Rain Mode On',
-    rainModeOff: 'Rain Mode Off',
-    sunAutomaticOn: 'Sun Automatic On',
-    sunAutomaticOff: 'Sun Automatic Off',
-    timeAutomaticOn: 'Time Automatic On',
-    timeAutomaticOff: 'Time Automatic Off',
-    dawnAutomaticOn: 'Dawn Automatic On',
-    dawnAutomaticOff: 'Dawn Automatic Off',
-    duskAutomaticOn: 'Dusk Automatic On',
-    duskAutomaticOff: 'Dusk Automatic Off',
-    manualModeOn: 'Manual Mode On',
-    manualModeOff: 'Manual Mode Off',
-    windAutomaticOn: 'Wind Automatic On',
-    windAutomaticOff: 'Wind Automatic Off',
-    rainAutomaticOn: 'Rain Automatic On',
-    rainAutomaticOff: 'Rain Automatic Off',
-    sunPosition: 'Sun Position',
-    ventilatingPosition: 'Ventilating Position',
-    ventilatingModeOn: 'Ventilating Mode On',
-    ventilatingModeOff: 'Ventilating Mode Off',
+const DEVICE_TYPES: Record<string, string> = {
+    "40": "RolloTron Standard",
+    "41": "RolloTron Comfort Slave",
+    "42": "Rohrmotor-Aktor",
+    "43": "Universalaktor",
+    "46": "Steckdosenaktor",
+    "47": "Rohrmotor Steuerung",
+    "48": "Dimmaktor",
+    "49": "Rohrmotor",
+    "4A": "Dimmer",
+    "4B": "Connect-Aktor",
+    "4C": "Troll Basis",
+    "4E": "SX5",
+    "61": "RolloTron Comfort Master",
+    "62": "Unspecified device type (62)",
+    "65": "Bewegungsmelder",
+    "69": "Umweltsensor",
+    "70": "Troll Comfort DuoFern",
+    "71": "Troll Comfort DuoFern Light",
+    "73": "Raumthermostat",
+    "74": "Wandtaster 6fach",
+    "A0": "Handsender 6G48",
+    "A1": "Handsender 1G48",
+    "A2": "Handsender 6G1",
+    "A3": "Handsender 1G1",
+    "A4": "Wandtaster",
+    "A5": "Sonnensensor",
+    "A7": "Funksender UP",
+    "A8": "HomeTimer",
+    "A9": "Sonnen-/Windsensor",
+    "AA": "Markisenwaechter",
+    "AB": "Rauchmelder",
+    "AC": "Fenster-Tuer-Kontakt",
+    "AD": "Wandtaster 6fach Bat",
+    "AF": "Sonnensensor",
+    "E0": "Handzentrale",
+    "E1": "Heizkoerperantrieb",
 };
 
 /**
@@ -202,41 +224,53 @@ function getCommandCapabilities(): Record<string, StateDefinition> {
 
     // Basic movement commands - all are buttons
     capabilities.up = {
-        name: COMMAND_NAMES.up,
+        name: 'Up',
         type: 'boolean',
         role: 'button',
         readable: false,
         writable: true,
+        commandMapping: {
+            commandTemplate: Commands.up,
+        },
     };
 
     capabilities.down = {
-        name: COMMAND_NAMES.down,
+        name: 'Down',
         type: 'boolean',
         role: 'button',
         readable: false,
         writable: true,
+        commandMapping: {
+            commandTemplate: Commands.down,
+        },
     };
 
     capabilities.stop = {
-        name: COMMAND_NAMES.stop,
+        name: 'Stop',
         type: 'boolean',
         role: 'button',
         readable: false,
         writable: true,
+        commandMapping: {
+            commandTemplate: Commands.stop,
+        },
     };
 
     capabilities.toggle = {
-        name: COMMAND_NAMES.toggle,
+        name: 'Toggle',
         type: 'boolean',
         role: 'button',
         readable: false,
         writable: true,
+        commandMapping: {
+            commandTemplate: Commands.toggle,
+        },
     };
 
     // Position is special - it's both a command and status
     // As a command, it's a numeric level control
     capabilities.position = {
-        name: COMMAND_NAMES.position,
+        name: 'Position',
         type: 'number',
         role: 'level',
         readable: true,
@@ -244,6 +278,9 @@ function getCommandCapabilities(): Record<string, StateDefinition> {
         unit: '%',
         min: 0,
         max: 100,
+        commandMapping: {
+            commandTemplate: Commands.position,
+        },
     };
 
     // Level for dimmers (brightness control, similar to position)
@@ -256,6 +293,9 @@ function getCommandCapabilities(): Record<string, StateDefinition> {
         unit: '%',
         min: 0,
         max: 100,
+        commandMapping: {
+            commandTemplate: Commands.position,
+        },
     };
 
     // On/Off commands for switches and dimmers
@@ -265,6 +305,9 @@ function getCommandCapabilities(): Record<string, StateDefinition> {
         role: 'button',
         readable: false,
         writable: true,
+        commandMapping: {
+            commandTemplate: Commands.toggle, // On uses toggle command
+        },
     };
 
     capabilities.off = {
@@ -273,24 +316,33 @@ function getCommandCapabilities(): Record<string, StateDefinition> {
         role: 'button',
         readable: false,
         writable: true,
+        commandMapping: {
+            commandTemplate: Commands.toggle, // Off uses toggle command
+        },
     };
 
     // Status request button
     capabilities.getStatus = {
-        name: COMMAND_NAMES.statusRequest,
+        name: 'Get Status',
         type: 'boolean',
         role: 'button',
         readable: false,
         writable: true,
+        commandMapping: {
+            commandTemplate: Commands.statusRequest,
+        },
     };
 
     // Remote pairing button
     capabilities.remotePair = {
-        name: COMMAND_NAMES.remotePair,
+        name: 'Remote Pair',
         type: 'boolean',
         role: 'button',
         readable: false,
         writable: true,
+        commandMapping: {
+            commandTemplate: Commands.remotePair,
+        },
     };
 
     return capabilities;
@@ -329,6 +381,52 @@ function inferTypeFromMapping(mapType: string | undefined): 'boolean' | 'string'
 }
 
 /**
+ * Get command mapping for a writable status field.
+ * Maps field names to their corresponding protocol commands.
+ * 
+ * @param {string} fieldName - The status field name
+ * @returns {StateDefinition['commandMapping'] | undefined} Command mapping if writable
+ */
+function getCommandMapping(fieldName: string): StateDefinition['commandMapping'] | undefined {
+    // Boolean toggles (on/off)
+    const booleanToggles: Record<string, { on: string; off: string }> = {
+        sunMode: { on: Commands.sunModeOn, off: Commands.sunModeOff },
+        windMode: { on: Commands.windModeOn, off: Commands.windModeOff },
+        rainMode: { on: Commands.rainModeOn, off: Commands.rainModeOff },
+        sunAutomatic: { on: Commands.sunAutomaticOn, off: Commands.sunAutomaticOff },
+        timeAutomatic: { on: Commands.timeAutomaticOn, off: Commands.timeAutomaticOff },
+        dawnAutomatic: { on: Commands.dawnAutomaticOn, off: Commands.dawnAutomaticOff },
+        duskAutomatic: { on: Commands.duskAutomaticOn, off: Commands.duskAutomaticOff },
+        manualMode: { on: Commands.manualModeOn, off: Commands.manualModeOff },
+        ventilatingMode: { on: Commands.ventilatingModeOn, off: Commands.ventilatingModeOff },
+        windAutomatic: { on: Commands.windAutomaticOn, off: Commands.windAutomaticOff },
+        rainAutomatic: { on: Commands.rainAutomaticOn, off: Commands.rainAutomaticOff },
+    };
+
+    if (booleanToggles[fieldName]) {
+        return {
+            commandOn: booleanToggles[fieldName].on,
+            commandOff: booleanToggles[fieldName].off,
+        };
+    }
+
+    // Numeric levels (positions)
+    const numericLevels: Record<string, string> = {
+        sunPosition: Commands.sunPosition,
+        ventilatingPosition: Commands.ventilatingPosition,
+        slatPosition: Commands.slatPosition,
+    };
+
+    if (numericLevels[fieldName]) {
+        return {
+            commandTemplate: numericLevels[fieldName],
+        };
+    }
+
+    return undefined;
+}
+
+/**
  * Extract status capabilities from the parser layer.
  * 
  * Analyzes the statusIds object to generate StateDefinition metadata for each status field.
@@ -349,7 +447,8 @@ function getStatusCapabilities(): Record<string, StateDefinition> {
 
         // Determine role based on field characteristics
         let role: StateDefinition['role'] = 'state';
-        if (fieldName === 'position' || fieldName === 'slatPosition') {
+        if (fieldName === 'position' || fieldName === 'slatPosition' ||
+            fieldName === 'sunPosition' || fieldName === 'ventilatingPosition') {
             role = 'level';
         } else if (!meta.writable) {
             role = 'indicator';
@@ -371,6 +470,14 @@ function getStatusCapabilities(): Record<string, StateDefinition> {
             def.unit = '%';
             def.min = 0;
             def.max = 100;
+        }
+
+        // Add command mapping for writable fields
+        if (meta.writable) {
+            const mapping = getCommandMapping(fieldName);
+            if (mapping) {
+                def.commandMapping = mapping;
+            }
         }
 
         capabilities[fieldName] = def;
@@ -447,6 +554,21 @@ export function getStateDefinitions(): Record<string, StateDefinition> {
 }
 
 /**
+ * Get human-readable device type name from device code.
+ * 
+ * Extracts the first two hex digits from the device code and looks up
+ * the corresponding device type name. Returns a generic name if the type
+ * is unknown.
+ * 
+ * @param {string} deviceCode - The 6-digit hex device code
+ * @returns {string} Human-readable device type name
+ */
+export function getDeviceTypeName(deviceCode: string): string {
+    const typeCode = deviceCode.substring(0, 2).toUpperCase();
+    return DEVICE_TYPES[typeCode] || `DuoFern Device ${deviceCode}`;
+}
+
+/**
  * Get device-specific state definitions based on device type.
  * 
  * Filters the complete state definitions to only include capabilities that are
@@ -475,9 +597,7 @@ export function getDeviceStateDefinitions(deviceCode: string): Record<string, St
             'moving', 'sunAutomatic', 'timeAutomatic', 'duskAutomatic', 'dawnAutomatic',
             'manualMode', 'runningTime', 'sunPosition', 'ventilatingPosition', 'ventilatingMode',
             'sunMode', 'rainAutomatic', 'windAutomatic', 'reversal', 'rainDirection', 'windDirection',
-            'windMode', 'rainMode',
-            // Safety indicators
-            'obstacle', 'block'
+            'windMode', 'rainMode'
         ],
         'venetianBlinds': [
             // All basic blind capabilities
@@ -486,8 +606,6 @@ export function getDeviceStateDefinitions(deviceCode: string): Record<string, St
             'manualMode', 'runningTime', 'sunPosition', 'ventilatingPosition', 'ventilatingMode',
             'sunMode', 'rainAutomatic', 'windAutomatic', 'reversal', 'rainDirection', 'windDirection',
             'windMode', 'rainMode',
-            // Safety indicators
-            'obstacle', 'block',
             // Plus venetian blind specific features (slat control)
             'slatRunTime', 'tiltAfterMoveLevel', 'tiltInVentPos', 'defaultSlatPos',
             'tiltAfterStopDown', 'motorDeadTime', 'tiltInSunPos', 'slatPosition', 'blindsMode'
@@ -506,10 +624,7 @@ export function getDeviceStateDefinitions(deviceCode: string): Record<string, St
             'on', 'off',
             // Automation modes
             'dawnAutomatic', 'duskAutomatic', 'manualMode',
-            'sunAutomatic', 'timeAutomatic', 'sunMode',
-            'modeChange', 'stairwellFunction', 'stairwellTime',
-            // Triggers
-            'dusk', 'dawn'
+            'sunAutomatic', 'timeAutomatic', 'sunMode'
         ],
         'dimmer': [
             // Dimmer control (brightness level)
@@ -517,12 +632,8 @@ export function getDeviceStateDefinitions(deviceCode: string): Record<string, St
             // Automation modes (same as actuator)
             'dawnAutomatic', 'duskAutomatic', 'manualMode',
             'sunAutomatic', 'timeAutomatic', 'sunMode',
-            'modeChange', 'stairwellFunction', 'stairwellTime',
             // Dimmer-specific
-            'runningTime', 'intermediateMode', 'intermediateValue',
-            'saveIntermediateOnStop',
-            // Triggers
-            'dusk', 'dawn'
+            'runningTime'
         ],
         'sensor': [
             // Sensors typically only report status, no control
