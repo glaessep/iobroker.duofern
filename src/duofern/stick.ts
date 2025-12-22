@@ -36,7 +36,7 @@ export class DuoFernStick extends EventEmitter {
     private buffer: string = "";
     private queue: string[] = [];
     private isProcessingQueue: boolean = false;
-    public initialized: boolean = false;
+    private initialized: boolean = false;
     private dongleSerial: string;
     private knownDevices: string[];
     private currentInitStep: string = "";
@@ -103,7 +103,8 @@ export class DuoFernStick extends EventEmitter {
      * Initiates the stick initialization sequence.
      * 
      * @private
-     */    private onOpen(): void {
+     */
+    private onOpen(): void {
         this.emit('open');
         this.startInit();
     }
@@ -373,12 +374,19 @@ export class DuoFernStick extends EventEmitter {
      * 
      * @public
      * @async
+     * @param {string[]} [updatedDevices] - Optional updated list of device codes to register
      * @returns {Promise<void>}
      * @throws {Error} If reopen fails
      */
-    public async reopen(): Promise<void> {
+    public async reopen(updatedDevices?: string[]): Promise<void> {
         this.emit('log', 'info', 'Reopening connection to DuoFern stick...');
         try {
+            // Update device list if provided
+            if (updatedDevices) {
+                this.knownDevices = updatedDevices;
+                this.emit('log', 'debug', `Updated device list: ${updatedDevices.join(', ')}`);
+            }
+
             // Close existing connection
             await this.close();
             this.initialized = false;
