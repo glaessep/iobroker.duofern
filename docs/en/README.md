@@ -1,6 +1,6 @@
 # ioBroker.duofern
 
-Adapter for Rademacher DuoFern devices via DuoFern USB Stick.
+Adapter to connect Rademacher DuoFern devices via DuoFern USB Stick.
 
 ## Installation
 
