@@ -54,6 +54,13 @@ Enter the 6-digit hexadecimal code of your DuoFern stick:
 
 ## Development
 
+### Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines on:
+- Commit message format (Conventional Commits)
+- Version management and semantic versioning
+- Code quality standards and testing requirements
+
 ### Testing
 
 The project includes comprehensive unit tests with code coverage reporting:
@@ -69,6 +76,8 @@ npm run test:coverage
 npm run test:coverage:check
 ```
 
+The project maintains high code coverage standards with automated checks enforced through CI/CD pipelines.
+
 ### Test Environment
 A standalone CLI is provided to test the library and the stick without ioBroker.
 
@@ -83,5 +92,15 @@ A standalone CLI is provided to test the library and the stick without ioBroker.
     -   `exit`
 
 ### Build
-`npm run build`
+```bash
+npm run build
+```
 
+### Continuous Integration
+
+The project uses GitHub Actions for automated testing and quality checks:
+- **Test Workflow**: Runs on every pull request to the main branch
+- **Coverage Validation**: Enforces minimum coverage thresholds for statements, branches, and functions
+- **Build Verification**: Ensures TypeScript compilation succeeds
+
+All pull requests must pass these automated checks before merging.
