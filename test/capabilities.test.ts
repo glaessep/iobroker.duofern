@@ -6,7 +6,7 @@
  */
 
 import * as assert from 'assert';
-import { getStateDefinitions, getDeviceStateDefinitions } from '../src/duofern/capabilities';
+import { getStateDefinitions, getDeviceStateDefinitions, getDeviceTypeName } from '../src/duofern/capabilities';
 
 describe('capabilities', () => {
     describe('getStateDefinitions', () => {
@@ -562,6 +562,24 @@ describe('capabilities', () => {
                     assert.strictEqual(definitions[setting].writable, true, `${setting} should be writable`);
                 }
             }
+        });
+    });
+
+    describe('getDeviceTypeName', () => {
+        it('should return correct device type name for known device codes', () => {
+            assert.strictEqual(getDeviceTypeName('40123456'), 'RolloTron Standard');
+            assert.strictEqual(getDeviceTypeName('61ABCDEF'), 'RolloTron Comfort Master');
+            assert.strictEqual(getDeviceTypeName('70123456'), 'Troll Comfort DuoFern');
+        });
+
+        it('should return generic name for unknown device codes', () => {
+            const result = getDeviceTypeName('FF123456');
+            assert.ok(result.startsWith('DuoFern Device'));
+            assert.ok(result.includes('FF123456'));
+        });
+
+        it('should handle lowercase device codes', () => {
+            assert.strictEqual(getDeviceTypeName('a0123456'), 'Handsender 6G48');
         });
     });
 });
