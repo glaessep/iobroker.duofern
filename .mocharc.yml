@@ -7,9 +7,10 @@ spec: 'test/**/*.test.ts'
 require:
   - 'ts-node/register/transpile-only'
 
-# Use experimental loader for ESM support
+# Use ts-node loader for TypeScript support and suppress deprecation warnings
 node-option:
   - 'loader=ts-node/esm'
+  - 'no-warnings'
 
 # Test environment
 ui: 'bdd'

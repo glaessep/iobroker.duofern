@@ -1,0 +1,89 @@
+name: Test and Coverage
+
+on:
+  pull_request:
+    branches:
+      - main
+
+env:
+  COVERAGE_DIR: coverage
+  COVERAGE_TEMP_DIR: .nyc_output
+  COVERAGE_STATEMENTS: 95
+  COVERAGE_BRANCHES: 85
+  COVERAGE_FUNCTIONS: 100
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Run tests, coverage and check thresholds for duofern folder
+        id: coverage-check
+        continue-on-error: true
+        run: |
+          npx nyc --reporter=text --reporter=json --reporter=json-summary \
+            --report-dir=${{ env.COVERAGE_DIR }} --temp-dir=${{ env.COVERAGE_TEMP_DIR }} \
+            --include='src/duofern/**/*.ts' --exclude='**/*.d.ts' \
+            --check-coverage --statements=${{ env.COVERAGE_STATEMENTS }} --branches=${{ env.COVERAGE_BRANCHES }} --functions=${{ env.COVERAGE_FUNCTIONS }} \
+            npm test
+
+      - name: Extract coverage metrics
+        id: coverage-metrics
+        if: always()
+        run: |
+          COVERAGE_SUMMARY="${{ env.COVERAGE_DIR }}/coverage-summary.json"
+          if [ -f "$COVERAGE_SUMMARY" ]; then
+            STATEMENTS=$(jq -r '.total.statements.pct' "$COVERAGE_SUMMARY")
+            BRANCHES=$(jq -r '.total.branches.pct' "$COVERAGE_SUMMARY")
+            FUNCTIONS=$(jq -r '.total.functions.pct' "$COVERAGE_SUMMARY")
+            echo "statements=$STATEMENTS" >> $GITHUB_OUTPUT
+            echo "branches=$BRANCHES" >> $GITHUB_OUTPUT
+            echo "functions=$FUNCTIONS" >> $GITHUB_OUTPUT
+          else
+            echo "⚠️ Coverage summary file not found"
+            echo "statements=0" >> $GITHUB_OUTPUT
+            echo "branches=0" >> $GITHUB_OUTPUT
+            echo "functions=0" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Coverage check result
+        if: always()
+        run: |
+          ACTUAL_STATEMENTS="${{ steps.coverage-metrics.outputs.statements }}"
+          ACTUAL_BRANCHES="${{ steps.coverage-metrics.outputs.branches }}"
+          ACTUAL_FUNCTIONS="${{ steps.coverage-metrics.outputs.functions }}"
+          
+          if [ "${{ steps.coverage-check.outcome }}" = "success" ]; then
+            echo "✅ Coverage checks passed!"
+            echo ""
+            echo "Coverage achieved:"
+            echo "  • Statements: $ACTUAL_STATEMENTS% (required: ${{ env.COVERAGE_STATEMENTS }}%) ✓"
+            echo "  • Branches: $ACTUAL_BRANCHES% (required: ${{ env.COVERAGE_BRANCHES }}%) ✓"
+            echo "  • Functions: $ACTUAL_FUNCTIONS% (required: ${{ env.COVERAGE_FUNCTIONS }}%) ✓"
+          else
+            echo "❌ Coverage checks failed!"
+            echo ""
+            echo "Coverage achieved vs required:"
+            echo "  • Statements: $ACTUAL_STATEMENTS% (required: ${{ env.COVERAGE_STATEMENTS }}%)"
+            echo "  • Branches: $ACTUAL_BRANCHES% (required: ${{ env.COVERAGE_BRANCHES }}%)"
+            echo "  • Functions: $ACTUAL_FUNCTIONS% (required: ${{ env.COVERAGE_FUNCTIONS }}%)"
+            echo ""
+            echo "💡 To fix missing coverage locally, run:"
+            echo "   npm run test:coverage:check"
+            exit 1
+          fi

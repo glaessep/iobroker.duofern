@@ -81,7 +81,7 @@ async function initializeStick(stickInstance: DuoFernStick, timeout = 300): Prom
     port.write = originalWrite;
 }
 
-describe('DuoFern Stick Coverage', () => {
+describe('DuoFern Stick', () => {
     let stick: DuoFernStick;
     let mockPort: MockSerialPort;
 
@@ -463,6 +463,47 @@ describe('DuoFern Stick Coverage', () => {
         // Verify the device list was updated
         const knownDevices = (stick as any).knownDevices;
         assert.deepStrictEqual(knownDevices, ['112233', '445566']);
+    });
+
+    it('should handle reopen() with queued commands', async function () {
+        this.timeout(2000);
+        await initializeStick(stick, 300);
+
+        assert.strictEqual(stick.isInitialized, true);
+
+        // Queue some commands that won't be processed
+        (stick as any).queue = ['command1', 'command2', 'command3'];
+
+        let warnLogReceived = false;
+        let debugLogCount = 0;
+
+        stick.on('log', (level, message) => {
+            if (level === 'warn' && message.includes('Discarding')) {
+                warnLogReceived = true;
+            }
+            if (level === 'debug' && message.includes('Discarded command')) {
+                debugLogCount++;
+            }
+        });
+
+        // Setup ACK handling for the reopen
+        const originalWrite = mockPort.write.bind(mockPort);
+        mockPort.write = (data: Buffer) => {
+            originalWrite(data);
+            setTimeout(() => mockPort.simulateData(Protocol.duoACK), 5);
+        };
+
+        const reopenPromise = new Promise<void>((resolve) => {
+            stick.once('initialized', () => resolve());
+        });
+
+        await stick.reopen();
+        await reopenPromise;
+        await new Promise(resolve => setTimeout(resolve, 50));
+
+        assert.strictEqual(stick.isInitialized, true);
+        assert.ok(warnLogReceived, 'Should emit warning about discarded commands');
+        assert.strictEqual(debugLogCount, 3, 'Should log each discarded command');
     });
 
     it('should handle reopen() failure and emit error', async function () {
