@@ -1,8 +1,16 @@
 {
     "common": {
         "name": "duofern",
-        "version": "0.3.4",
+        "version": "0.6.1",
         "news": {
+            "0.5.5": {
+                "en": "Comprehensive testing coverage with NYC configuration, improved device registration reliability, and enhanced validation for serial port and DuoFern stick code. Refactored state command definitions to protocol layer for improved code organization and single source of truth",
+                "de": "Umfassende Testabdeckung mit NYC-Konfiguration, verbesserte Zuverlässigkeit der Geräteregistrierung und erweiterte Validierung für serielle Schnittstelle und DuoFern-Stick-Code. Zustandsbefehldefinitionen zur Protokollschicht refaktoriert für verbesserte Code-Organisation und Single Source of Truth"
+            },
+            "0.4.0": {
+                "en": "Device capability definitions moved to dedicated module, improved device categorization, and device-type-specific state filtering",
+                "de": "Gerätefähigkeitsdefinitionen in dediziertes Modul verschoben, verbesserte Gerätekategorisierung und gerätespezifische Statusfilterung"
+            },
             "0.3.4": {
                 "en": "Fix device name preservation - names are no longer overwritten when adapter is redeployed",
                 "de": "Gerätename-Erhaltung korrigiert - Namen werden nicht mehr überschrieben wenn der Adapter neu bereitgestellt wird"

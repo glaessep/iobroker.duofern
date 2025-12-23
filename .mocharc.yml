@@ -3,8 +3,13 @@
 # Test files pattern
 spec: 'test/**/*.test.ts'
 
-# Require ts-node for TypeScript support
-require: 'ts-node/register'
+# Require ts-node for TypeScript support with transpile-only for speed
+require:
+  - 'ts-node/register/transpile-only'
+
+# Use experimental loader for ESM support
+node-option:
+  - 'loader=ts-node/esm'
 
 # Test environment
 ui: 'bdd'

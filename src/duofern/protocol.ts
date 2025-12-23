@@ -97,6 +97,7 @@ export const Commands = {
     ventilatingPosition: "080200nn", // 4 bytes: 08 02 00 nn
     ventilatingModeOn: "080200FD",
     ventilatingModeOff: "080200FE",
+    slatPosition: "071B00nn",      // 4 bytes: 07 1B 00 nn (nn = position 00-64 hex = 0-100%)
 
 };
 
@@ -263,7 +264,7 @@ export function buildRemotePairFrames(deviceCode: string, channel = "01"): strin
     // Build frames matching the Protocol.duoRemotePair structure:
     // "0D" + channel + "060100" + 26 zero hex chars + deviceCode (6 hex) + suffix
     // Total: 44 hex chars (22 bytes)
-    const frame = (suffix: string) =>
+    const frame = (suffix: string): string =>
         `0D${chan}06010000000000000000000000000000${dev}${suffix}`;
     return [frame("00"), frame("01")];
 }

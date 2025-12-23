@@ -107,7 +107,7 @@ describe('DuoFern Stick Coverage', () => {
 
         await initializeStick(stick, 300);
 
-        assert.strictEqual(stick.initialized, true);
+        assert.strictEqual(stick.isInitialized, true);
         assert.ok(initialized);
     });
 
@@ -161,7 +161,7 @@ describe('DuoFern Stick Coverage', () => {
 
         // Verify port is open
         assert.ok(mockPort.isOpen, 'Port should be open after init');
-        assert.ok(stick.initialized, 'Stick should be initialized');
+        assert.ok(stick.isInitialized, 'Stick should be initialized');
 
         let receivedFrame = '';
         stick.on('paired', (frame) => {
@@ -184,7 +184,7 @@ describe('DuoFern Stick Coverage', () => {
 
         // Verify port is open
         assert.ok(mockPort.isOpen, 'Port should be open after init');
-        assert.ok(stick.initialized, 'Stick should be initialized');
+        assert.ok(stick.isInitialized, 'Stick should be initialized');
 
         let receivedFrame = '';
         stick.on('unpaired', (frame) => {
@@ -234,7 +234,7 @@ describe('DuoFern Stick Coverage', () => {
         await stickWithDevices.open();
         await new Promise(resolve => setTimeout(resolve, 400));
 
-        assert.strictEqual(stickWithDevices.initialized, true);
+        assert.strictEqual(stickWithDevices.isInitialized, true);
         await stickWithDevices.close();
     });
 
@@ -319,7 +319,7 @@ describe('DuoFern Stick Coverage', () => {
         this.timeout(2000);
         await initializeStick(stick, 300);
 
-        assert.strictEqual(stick.initialized, true);
+        assert.strictEqual(stick.isInitialized, true);
 
         // Setup ACK handling for the reopen
         const originalWrite = mockPort.write.bind(mockPort);
@@ -336,7 +336,7 @@ describe('DuoFern Stick Coverage', () => {
         await reopenPromise;
         await new Promise(resolve => setTimeout(resolve, 50));
 
-        assert.strictEqual(stick.initialized, true);
+        assert.strictEqual(stick.isInitialized, true);
     });
 
     it('should close gracefully when already closed', async () => {
@@ -404,5 +404,107 @@ describe('DuoFern Stick Coverage', () => {
         await new Promise(resolve => setTimeout(resolve, 5500));
 
         assert.ok(timeoutWarning);
+    });
+
+    it('should clear queueTimeout when ACK received', async function () {
+        this.timeout(3000);
+        await initializeStick(stick, 300);
+
+        // Setup to NOT automatically send ACK, but track the write
+        mockPort.writtenData = [];
+
+        // Queue a command - this should set the queueTimeout
+        stick.write('0D000007010000000000006F1234ABCDEF00');
+
+        // Wait for command to be sent
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        // Verify command was written
+        assert.ok(mockPort.writtenData.length > 0, 'Command should have been written');
+
+        // Verify timeout was set by checking internal state
+        const hasTimeout = (stick as any).queueTimeout !== null;
+        assert.ok(hasTimeout, 'Queue timeout should be set after sending command');
+
+        // Now simulate ACK to clear the timeout
+        mockPort.simulateData(Protocol.duoACK);
+
+        await new Promise(resolve => setTimeout(resolve, 50));
+
+        // Verify timeout was cleared
+        const timeoutCleared = (stick as any).queueTimeout === null;
+        assert.ok(timeoutCleared, 'Queue timeout should be cleared after ACK');
+    });
+
+    it('should handle reopen() with updated device list', async function () {
+        this.timeout(2000);
+        await initializeStick(stick, 300);
+
+        assert.strictEqual(stick.isInitialized, true);
+
+        // Setup ACK handling for the reopen
+        const originalWrite = mockPort.write.bind(mockPort);
+        mockPort.write = (data: Buffer) => {
+            originalWrite(data);
+            setTimeout(() => mockPort.simulateData(Protocol.duoACK), 5);
+        };
+
+        const reopenPromise = new Promise<void>((resolve) => {
+            stick.once('initialized', () => resolve());
+        });
+
+        // Call reopen with updated devices
+        await stick.reopen(['112233', '445566']);
+        await reopenPromise;
+        await new Promise(resolve => setTimeout(resolve, 50));
+
+        assert.strictEqual(stick.isInitialized, true);
+
+        // Verify the device list was updated
+        const knownDevices = (stick as any).knownDevices;
+        assert.deepStrictEqual(knownDevices, ['112233', '445566']);
+    });
+
+    it('should handle reopen() failure and emit error', async function () {
+        this.timeout(2000);
+        await initializeStick(stick, 300);
+
+        assert.strictEqual(stick.isInitialized, true);
+
+        // Make the close fail
+        const originalClose = mockPort.close.bind(mockPort);
+        mockPort.close = (callback: (err?: Error) => void) => {
+            callback(new Error('Reopen close failed'));
+        };
+
+        let errorEmitted = false;
+        let emittedError: any = null;
+        // Use 'on' instead of 'once' to ensure we don't miss it
+        stick.on('error', (err) => {
+            emittedError = err;
+            if (err.message && err.message.includes('Reopen failed')) {
+                errorEmitted = true;
+            }
+        });
+
+        try {
+            await stick.reopen(['NEWDEV']);
+            assert.fail('Should have thrown error');
+        } catch (err: any) {
+            // The error might just be the original error
+            assert.ok(err.message, `Error should have a message, got: ${JSON.stringify(err)}`);
+
+            // Give event loop a chance to emit the error event
+            await new Promise(resolve => setTimeout(resolve, 10));
+
+            // Verify error event was emitted
+            assert.ok(errorEmitted, `Error event should have been emitted. Got: ${emittedError ? emittedError.message : 'no error'}`);
+        }
+
+        // Restore
+        mockPort.close = originalClose;
+
+        // Remove the error listener we added
+        stick.removeAllListeners('error');
     });
 });

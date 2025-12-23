@@ -111,9 +111,9 @@ describe('DuoFern Parser', () => {
             const frame = '0FFF0F21' + 'FF'.repeat(9);
             const result = parseStatus(frame);
 
-            // Verify that mapped fields are present and are strings (not numbers)
+            // Verify that onOff-mapped fields return boolean values (true/false)
             const hasBoolean = Object.entries(result).some(([key, val]) =>
-                typeof val === 'string' && (val === 'on' || val === 'off')
+                typeof val === 'boolean'
             );
             assert.ok(hasBoolean, 'Should have at least one boolean status field');
         });
@@ -165,7 +165,8 @@ describe('DuoFern Parser', () => {
 
             if ('ventilatingPosition' in result) {
                 // With all zeros, inverted values should be at maximum (100)
-                assert.ok(result.ventilatingPosition >= 0 && result.ventilatingPosition <= 100);
+                const pos = result.ventilatingPosition;
+                assert.ok(typeof pos === 'number' && pos >= 0 && pos <= 100);
             }
         });
 
@@ -179,6 +180,22 @@ describe('DuoFern Parser', () => {
             assert.ok(Object.keys(result).length > 0, 'Should extract format 23 fields');
             const hasNumeric = Object.values(result).some(val => typeof val === 'number');
             assert.ok(hasNumeric, 'Should have at least one numeric field');
+        });
+
+        it('should extract runningTime as numeric value without mapping', () => {
+            // runningTime (status ID 109) has no map, should return raw numeric value
+            // Format 23, position 6, bits 0-7 (full byte, extracts bits 0-7 from 16-bit value)
+            // Position 6 means index 6 + 6*2 = 18, so chars 18-21 (16-bit value)
+            // Bits 0-7 means lower byte of the 16-bit value
+            let frame = '0FFF0F23';       // Format 23 (chars 0-7)
+            frame += '00'.repeat(6);      // positions 0-5 (chars 8-19)
+            frame += 'AA00';              // position 6 (chars 20-23): 0xAA00, bits 0-7 = 0xAA = 170
+            frame += '00'.repeat(3);      // padding (chars 24-29)
+
+            const result = parseStatus(frame);
+
+            // runningTime should be extracted as raw numeric value 170
+            assert.strictEqual(result.runningTime, 170, 'runningTime should be numeric without mapping');
         });
 
         it('should skip status IDs with missing definitions', () => {

@@ -42,8 +42,9 @@ interface StatusIdDef {
  * - "22": Reserved for other device types (not yet implemented)
  * - "23": Extended blind status with slat/tilt control
  * - "23a": Alternate extended blind format
- * - "24": Blind status with wind/rain modes and obstacle detection
- * - "24a": Gate/door status with light curtain, automatic closing, alarms
+ * - "24": Blind status with wind/rain modes (for blinds only, no gate fields)
+ * - "24a": Gate/door status with obstacle/block detection, light curtain, automatic closing, alarms
+ * - "2C": Timer/configuration frames (no standard status data)
  * 
  * @constant {Object.<string, number[]>} statusGroups
  */
@@ -52,8 +53,9 @@ const statusGroups: { [key: string]: number[] } = {
     "22": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
     "23": [102, 107, 109, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130, 131, 132, 133, 134, 135, 136, 140, 141, 50],
     "23a": [102, 107, 109, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 133, 140, 141, 50],
-    "24": [102, 107, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 140, 141, 400, 402, 50],
+    "24": [102, 107, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 140, 141, 50],
     "24a": [102, 107, 115, 123, 124, 400, 402, 404, 405, 406, 407, 408, 409, 410, 411, 50],
+    "2C": [],
     // ... others omitted for now (blinds focus)
 };
 
@@ -70,9 +72,9 @@ const statusGroups: { [key: string]: number[] } = {
  * managed entirely by command logic when handling up/down/position
  * commands, rather than being derived from device status bytes.
  * 
- * @constant {Object.<string, any[]>} statusMapping
+ * @constant {Object.<string, (string | number)[]>} statusMapping
  */
-const statusMapping: { [key: string]: any[] } = {
+const statusMapping: { [key: string]: (string | number)[] } = {
     "onOff": ["off", "on"],
     "upDown": ["up", "down"],
     "moving": ["stop", "stop"],
@@ -165,19 +167,24 @@ const statusIds: { [key: number]: StatusIdDef } = {
  * the frame format byte. Each status value is extracted using bit manipulation,
  * then optionally inverted and/or mapped to human-readable values.
  * 
+ * Note: While this function returns parsed status fields from device frames,
+ * callers (e.g., updateDeviceStates in main.ts) may pass additional fields
+ * beyond the parsed status, such as 'paired: true' for pairing events.
+ * The return type includes these possible extensions.
+ * 
  * @export
  * @param {string} frame - 44-character hex string status frame (format: 0FFF0F...)
- * @returns {Record<string, any>} Object with status field names as keys and parsed values
+ * @returns {Record<string, string | number | boolean>} Object with status field names as keys and parsed values
  * 
  * @example
  * const status = parseStatus('0FFF0F21...');
- * // Returns: { position: 50, moving: 'stop', sunAutomatic: 'on', ... }
+ * // Returns: { position: 50, moving: 'stop', sunAutomatic: true, ... }
  */
-export function parseStatus(frame: string): Record<string, any> {
+export function parseStatus(frame: string): Record<string, string | number | boolean> {
     // Frame format: 0FFF0F...
     // Byte 3 (index 6-7) is format
     const format = frame.substring(6, 8);
-    const result: Record<string, any> = {};
+    const result: Record<string, string | number | boolean> = {};
 
     // Default to channel 01 for now
     const chan = "01";
@@ -218,18 +225,26 @@ export function parseStatus(frame: string): Record<string, any> {
             // Map
             if (def.map && statusMapping[def.map]) {
                 const map = statusMapping[def.map];
-                // Check for scale/hex maps
+                /* istanbul ignore next -- scale mappings are not implemented yet */
                 if (def.map.startsWith("scale")) {
-                    // Not implemented for blinds, mostly for sensors
-                } else if (def.map === "hex") {
-                    // Not implemented
-                } else {
-                    // Array map
-                    if (value < map.length) {
-                        result[def.name] = map[value];
+                    continue;
+                }
+
+                /* istanbul ignore next -- hex mappings are not implemented yet */
+                if (def.map === "hex") {
+                    continue;
+                }
+
+                // Array map
+                if (value < map.length) {
+                    // For onOff mapping, return boolean value
+                    if (def.map === 'onOff') {
+                        result[def.name] = value === 1; // true for 1, false for 0
                     } else {
-                        result[def.name] = value;
+                        result[def.name] = map[value];
                     }
+                } else {
+                    result[def.name] = value;
                 }
             } else {
                 result[def.name] = value;

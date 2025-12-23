@@ -9,6 +9,9 @@
             "sm": 12,
             "md": 8,
             "lg": 8
+            "validator": "!!data.port && data.port.trim().length > 0",
+            "validatorErrorText": "Serial port is required",
+            "validatorNoSaveOnError": true
         },
         "code": {
             "type": "text",
@@ -17,8 +20,9 @@
             "sm": 12,
             "md": 4,
             "lg": 4,
-            "validator": "^6[Ff][0-9A-Fa-f]{4}$",
-            "validatorError": "Wrong format: Must start with 6F and be 6 hex digits long"
+            "validator": "data.code != null && /^6[Ff][0-9A-Fa-f]{4}$/.test(data.code)",
+            "validatorErrorText": "Must be exactly 6 hex digits starting with 6F (e.g., 6F1A2B)",
+            "validatorNoSaveOnError": true
         }
     }
 }
