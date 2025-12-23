@@ -8,7 +8,7 @@
             "help": "Serial Port Help",
             "sm": 12,
             "md": 8,
-            "lg": 8
+            "lg": 8,
             "validator": "!!data.port && data.port.trim().length > 0",
             "validatorErrorText": "Serial port is required",
             "validatorNoSaveOnError": true
