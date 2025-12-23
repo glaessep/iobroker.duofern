@@ -36,7 +36,7 @@ jobs:
         id: coverage-check
         continue-on-error: true
         run: |
-          npx nyc --reporter=text --reporter=json \
+          npx nyc --reporter=text --reporter=json --reporter=json-summary \
             --report-dir=${{ env.COVERAGE_DIR }} --temp-dir=${{ env.COVERAGE_TEMP_DIR }} \
             --include='src/duofern/**/*.ts' --exclude='**/*.d.ts' \
             --check-coverage --statements=${{ env.COVERAGE_STATEMENTS }} --branches=${{ env.COVERAGE_BRANCHES }} --functions=${{ env.COVERAGE_FUNCTIONS }} \
@@ -46,15 +46,16 @@ jobs:
         id: coverage-metrics
         if: always()
         run: |
-          COVERAGE_JSON="${{ env.COVERAGE_TEMP_DIR }}/coverage-final.json"
-          if [ -f "$COVERAGE_JSON" ]; then
-            STATEMENTS=$(jq '.total.statements.pct' "$COVERAGE_JSON")
-            BRANCHES=$(jq '.total.branches.pct' "$COVERAGE_JSON")
-            FUNCTIONS=$(jq '.total.functions.pct' "$COVERAGE_JSON")
+          COVERAGE_SUMMARY="${{ env.COVERAGE_DIR }}/coverage-summary.json"
+          if [ -f "$COVERAGE_SUMMARY" ]; then
+            STATEMENTS=$(jq -r '.total.statements.pct' "$COVERAGE_SUMMARY")
+            BRANCHES=$(jq -r '.total.branches.pct' "$COVERAGE_SUMMARY")
+            FUNCTIONS=$(jq -r '.total.functions.pct' "$COVERAGE_SUMMARY")
             echo "statements=$STATEMENTS" >> $GITHUB_OUTPUT
             echo "branches=$BRANCHES" >> $GITHUB_OUTPUT
             echo "functions=$FUNCTIONS" >> $GITHUB_OUTPUT
           else
+            echo "⚠️ Coverage summary file not found"
             echo "statements=0" >> $GITHUB_OUTPUT
             echo "branches=0" >> $GITHUB_OUTPUT
             echo "functions=0" >> $GITHUB_OUTPUT
