@@ -21,6 +21,21 @@ Use the repository owner and name from context:
 - PR number: From active PR in repository context, or explicitly provided by userplement the suggested fix or provide a reasoned explanation for not doing so.
 
 ## Critical Rules
+
+### 🚨 MOST IMPORTANT: How to Reply to Comments
+**You MUST reply directly in each review comment thread using the GitHub API:**
+
+```bash
+curl -X POST \
+  -H "Authorization: token $(gh auth token)" \
+  -H "Accept: application/vnd.github+json" \
+  "https://api.github.com/repos/{owner}/{repo}/pulls/comments/{comment_id}/replies" \
+  -d '{"body":"Your response message here"}'
+```
+
+**DO NOT use `mcp_github_add_issue_comment` - that posts general PR comments, not thread replies!**
+
+### Other Rules
 1. **Individual Thread Responses**: Post a response directly in each review comment thread - do NOT post a single summary comment
 2. **Never Resolve**: Never mark comments as resolved - only the user can do this
 3. **Read Before Acting**: Carefully read and understand each comment before taking action
@@ -32,7 +47,7 @@ Use the repository owner and name from context:
 ### Step 1: Fetch Review Comments
 Activate GitHub PR management tools and fetch all review comments for the active PR. Filter for unresolved comments only.
 
-### Step 2: Analyze Each Comment
+### Step 2: For EACH Comment - Analyze, Fix (if needed), and Reply
 For each comment:
 - Read the full comment text carefully
 - Identify the file and line(s) being discussed
@@ -77,8 +92,8 @@ curl -X POST \
 
 **Note:** Do NOT use `mcp_github_add_issue_comment` - that posts general PR comments, not replies to specific review threads.
 
-### Response Format
-Use this format for your responses:
+#### 2e. Response Format
+Use this format in your curl reply body:
 
 **If fixed:**
 ```
