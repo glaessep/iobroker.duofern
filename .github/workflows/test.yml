@@ -9,18 +9,14 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version: [20.x]
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js ${{ matrix.node-version }}
+      - name: Setup Node.js 20.x
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 20.x
           cache: 'npm'
 
       - name: Install dependencies
@@ -29,13 +25,10 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Run tests
-        run: npm test
-
-      - name: Run coverage and check thresholds for duofern folder
+      - name: Run tests, coverage and check thresholds for duofern folder
         run: |
-          npx nyc --reporter=text --reporter=html --reporter=lcov \
-            --report-dir=coverage --temp-dir=.nyc_output \
+          echo "To fix missing coverage locally, run: npm run test:coverage:check"
+          npx nyc --reporter=text \
             --include='src/duofern/**/*.ts' --exclude='**/*.d.ts' \
             --check-coverage --statements=90 --branches=80 --functions=100 \
             npm test

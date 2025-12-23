@@ -81,7 +81,7 @@ async function initializeStick(stickInstance: DuoFernStick, timeout = 300): Prom
     port.write = originalWrite;
 }
 
-describe('DuoFern Stick Coverage', () => {
+describe('DuoFern Stick', () => {
     let stick: DuoFernStick;
     let mockPort: MockSerialPort;
 
