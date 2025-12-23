@@ -7,8 +7,8 @@
             "label": "Serial Port",
             "help": "Serial Port Help",
             "sm": 12,
-            "md": 6,
-            "lg": 4,
+            "md": 12,
+            "lg": 6,
             "validator": "!!data.port && data.port.trim().length > 0",
             "validatorErrorText": "Serial port is required",
             "validatorNoSaveOnError": true
@@ -18,8 +18,8 @@
             "label": "DuoFern Stick Code (6 hex digits, e.g. 6Fxxxx)",
             "help": "Stick Code Help",
             "sm": 12,
-            "md": 6,
-            "lg": 4,
+            "md": 12,
+            "lg": 6,
             "validator": "data.code != null && /^6[Ff][0-9A-Fa-f]{4}$/.test(data.code)",
             "validatorErrorText": "Must be exactly 6 hex digits starting with 6F (e.g., 6F1A2B)",
             "validatorNoSaveOnError": true
