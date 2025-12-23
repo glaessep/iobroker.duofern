@@ -1,7 +1,7 @@
 {
     "common": {
         "name": "duofern",
-        "version": "0.6.2",
+        "version": "0.6.3",
         "news": {
             "0.5.5": {
                 "en": "Comprehensive testing coverage with NYC configuration, improved device registration reliability, and enhanced validation for serial port and DuoFern stick code. Refactored state command definitions to protocol layer for improved code organization and single source of truth",
