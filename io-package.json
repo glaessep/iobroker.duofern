@@ -3,6 +3,26 @@
         "name": "duofern",
         "version": "0.6.4",
         "news": {
+            "0.6.4": {
+                "en": "Added GitHub workflow for automated test and coverage checks, improved parameter visualization in adapter settings, and enhanced documentation",
+                "de": "GitHub-Workflow für automatisierte Test- und Coverage-Prüfungen hinzugefügt, verbesserte Parametervisualisierung in Adaptereinstellungen und erweiterte Dokumentation"
+            },
+            "0.6.3": {
+                "en": "Fixed layout parameters for Serial Port and DuoFern Stick Code in configuration UI",
+                "de": "Layout-Parameter für serielle Schnittstelle und DuoFern-Stick-Code in der Konfigurationsoberfläche korrigiert"
+            },
+            "0.6.2": {
+                "en": "Refactored state command definitions to protocol layer and improved parameter visualization",
+                "de": "Zustandsbefehldefinitionen zur Protokollschicht refaktoriert und Parametervisualisierung verbessert"
+            },
+            "0.6.1": {
+                "en": "Fixed remotePair command to use correct stick code parameter",
+                "de": "RemotePair-Befehl korrigiert um korrekten Stick-Code-Parameter zu verwenden"
+            },
+            "0.6.0": {
+                "en": "Moved state and command definitions to protocol layer for single source of truth and improved code organization",
+                "de": "Zustands- und Befehlsdefinitionen zur Protokollschicht verschoben für Single Source of Truth und verbesserte Code-Organisation"
+            },
             "0.5.5": {
                 "en": "Comprehensive testing coverage with NYC configuration, improved device registration reliability, and enhanced validation for serial port and DuoFern stick code. Refactored state command definitions to protocol layer for improved code organization and single source of truth",
                 "de": "Umfassende Testabdeckung mit NYC-Konfiguration, verbesserte Zuverlässigkeit der Geräteregistrierung und erweiterte Validierung für serielle Schnittstelle und DuoFern-Stick-Code. Zustandsbefehldefinitionen zur Protokollschicht refaktoriert für verbesserte Code-Organisation und Single Source of Truth"
