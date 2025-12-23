@@ -1,6 +1,6 @@
 # ioBroker.duofern
 
-Adapter für Rademacher DuoFern Geräte über DuoFern USB Stick.
+Adapter der Rademacher DuoFern Geräte über DuoFern USB Stick verbindet.
 
 ## Installation
 

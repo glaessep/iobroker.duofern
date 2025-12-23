@@ -1,7 +1,7 @@
 {
     "name": "iobroker.duofern",
     "version": "0.6.4",
-    "description": "ioBroker Adapter for Rademacher DuoFern",
+    "description": "ioBroker Adapter to connect Rademacher DuoFern devices via DuoFern USB Stick",
     "type": "commonjs",
     "author": "Patrick Gläßer",
     "license": "MIT",
