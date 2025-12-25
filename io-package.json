@@ -121,21 +121,16 @@
             "uk": "Підключайте пристрої Rademacher DuoFern через USB-накопичувач DuoFern",
             "zh-cn": "通过 DuoFern USB 棒连接 Rademacher DuoFern 设备"
         },
-        "authors": [
-            "Patrick Gläßer"
-        ],
-        "keywords": [
-            "rademacher",
-            "duofern"
-        ],
+        "authors": ["Patrick Gläßer"],
+        "keywords": ["rademacher", "duofern", "ioBroker"],
         "licenseInformation": {
             "type": "free",
             "license": "MIT"
         },
         "platform": "Javascript/Node.js",
-        "icon": "duofern.png",
+        "icon": "duofern.svg",
         "enabled": true,
-        "extIcon": "https://raw.githubusercontent.com/glaessep/ioBroker.duofern/main/admin/duofern.png",
+        "extIcon": "https://raw.githubusercontent.com/glaessep/ioBroker.duofern/main/admin/duofern.svg",
         "readme": "https://github.com/glaessep/ioBroker.duofern/blob/main/README.md",
         "loglevel": "info",
         "tier": 3,
