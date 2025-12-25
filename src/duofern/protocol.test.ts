@@ -1,17 +1,26 @@
 /**
  * @file Protocol Test Suite
- * 
+ *
  * Comprehensive unit tests for the DuoFern protocol implementation.
  * Tests command frame structure, initialization sequences, and validates
  * all commands against captured protocol traffic.
- * 
  * @module test/protocol.test
  * @author Patrick Gläßer
  * @license MIT
  */
 
 import * as assert from 'assert';
-import { buildBroadcastStatusRequest, buildCommand, buildRemotePair, buildRemotePairFrames, buildSetDongle, buildSetPairs, buildStatusRequest, Commands, Protocol } from './protocol';
+import {
+    buildBroadcastStatusRequest,
+    buildCommand,
+    buildRemotePair,
+    buildRemotePairFrames,
+    buildSetDongle,
+    buildSetPairs,
+    buildStatusRequest,
+    Commands,
+    Protocol,
+} from './protocol';
 
 describe('DuoFern Protocol', () => {
     const STICK_CODE = '6F1234';
@@ -20,7 +29,7 @@ describe('DuoFern Protocol', () => {
         deviceCode: DEVICE_CODE,
         stickCode: STICK_CODE,
         channel: '01',
-        suffix: '00'
+        suffix: '00',
     };
 
     describe('Command Frame Structure', () => {
@@ -35,7 +44,7 @@ describe('DuoFern Protocol', () => {
                 buildCommand(Commands.up, {}, frameOpts),
                 buildCommand(Commands.down, {}, frameOpts),
                 buildCommand(Commands.stop, {}, frameOpts),
-                buildCommand(Commands.position, { nn: 50 }, frameOpts)
+                buildCommand(Commands.position, { nn: 50 }, frameOpts),
             ];
 
             commands.forEach(cmd => {
@@ -277,7 +286,11 @@ describe('DuoFern Protocol', () => {
             assert.strictEqual(Commands.down.length, 8, 'DOWN command template should be 8 chars (4 bytes)');
             assert.strictEqual(Commands.stop.length, 8, 'STOP command template should be 8 chars (4 bytes)');
             assert.strictEqual(Commands.position.length, 8, 'POSITION command template should be 8 chars (4 bytes)');
-            assert.strictEqual(Commands.statusRequest.length, 8, 'STATUS REQUEST command template should be 8 chars (4 bytes)');
+            assert.strictEqual(
+                Commands.statusRequest.length,
+                8,
+                'STATUS REQUEST command template should be 8 chars (4 bytes)',
+            );
         });
 
         it('should have correct command prefixes', () => {
@@ -298,7 +311,7 @@ describe('DuoFern Protocol', () => {
                 { input: 50, expected: '32' },
                 { input: 75, expected: '4B' },
                 { input: 100, expected: '64' },
-                { input: 255, expected: 'FF' }
+                { input: 255, expected: 'FF' },
             ];
 
             testCases.forEach(({ input, expected }) => {
@@ -338,11 +351,15 @@ describe('DuoFern Protocol', () => {
         });
 
         it('should allow custom channel and suffix without stick code', () => {
-            const cmd = buildCommand(Commands.statusRequest, {}, {
-                deviceCode: DEVICE_CODE,
-                channel: 'FF',
-                suffix: '01'
-            });
+            const cmd = buildCommand(
+                Commands.statusRequest,
+                {},
+                {
+                    deviceCode: DEVICE_CODE,
+                    channel: 'FF',
+                    suffix: '01',
+                },
+            );
             const channel = cmd.substring(2, 4);
             const suffix = cmd.substring(42, 44);
             assert.strictEqual(channel, 'FF', 'Should allow custom channel without stick code');

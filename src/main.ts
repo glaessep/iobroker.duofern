@@ -1,6 +1,6 @@
 /**
  * @file ioBroker DuoFern Adapter Main Module
- * 
+ *
  * This module implements the core ioBroker adapter for Rademacher DuoFern devices.
  * It provides the main adapter logic that bridges ioBroker's state management system
  * with the DuoFern USB stick hardware communication layer.
@@ -15,8 +15,7 @@ import { DuoFernStick } from './duofern/stick';
 
 /**
  * Configuration interface for the DuoFern adapter.
- * 
- * @interface DuoFernAdapterConfig
+ *
  */
 interface DuoFernAdapterConfig {
     port: string;
@@ -26,7 +25,7 @@ interface DuoFernAdapterConfig {
 
 /**
  * Main adapter class for ioBroker DuoFern integration.
- * 
+ *
  * This class extends the ioBroker Adapter base class and provides the main logic
  * for communicating with DuoFern devices via the USB stick. It handles:
  * - Serial port communication initialization
@@ -34,13 +33,11 @@ interface DuoFernAdapterConfig {
  * - Command execution (up, down, stop, position, etc.)
  * - Status updates from devices
  * - State management in ioBroker
- * 
- * @class DuoFernAdapter
- * @extends {utils.Adapter}
+ *
  */
 export class DuoFernAdapter extends utils.Adapter {
     private stick: DuoFernStick | null = null;
-    public declare config: DuoFernAdapterConfig;
+    declare public config: DuoFernAdapterConfig;
     private buttonResetTimers: Map<string, NodeJS.Timeout> = new Map();
     private registeredDevices: Set<string> = new Set();
     private isReInitializing: boolean = false;
@@ -52,8 +49,8 @@ export class DuoFernAdapter extends utils.Adapter {
 
     /**
      * Creates an instance of DuoFernAdapter.
-     * 
-     * @param {Partial<utils.AdapterOptions>} [options={}] - Adapter options passed from ioBroker core
+     *
+     * @param [options] - Adapter options passed from ioBroker core
      */
     public constructor(options: Partial<utils.AdapterOptions> = {}) {
         super({
@@ -72,9 +69,9 @@ export class DuoFernAdapter extends utils.Adapter {
      * Green (true) when at least one device is registered.
      * Yellow (false) when stick is initialized but no devices are registered.
      */
-    private updateConnectionStatus(): void {
+    private async updateConnectionStatus(): Promise<void> {
         const hasDevices = this.registeredDevices.size > 0;
-        this.setState('info.connection', hasDevices, true);
+        await this.setState('info.connection', hasDevices, true);
         if (hasDevices) {
             this.log.debug(`Connection status: GREEN (${this.registeredDevices.size} device(s) registered)`);
         } else {
@@ -84,6 +81,7 @@ export class DuoFernAdapter extends utils.Adapter {
 
     /**
      * Reset a button state to null after a 1-second delay
+     *
      * @param stateId - Full state ID (e.g., 'pair', 'deviceId.up')
      */
     private resetButtonState(stateId: string): void {
@@ -100,7 +98,8 @@ export class DuoFernAdapter extends utils.Adapter {
                 this.buttonResetTimers.delete(stateId);
                 this.log.debug(`Button state reset: ${stateId}`);
             } catch (err) {
-                this.log.error(`Error resetting button state ${stateId}: ${err}`);
+                const errorMsg = err instanceof Error ? err.message : String(err);
+                this.log.error(`Error resetting button state ${stateId}: ${errorMsg}`);
             }
         }, 1000);
 
@@ -109,14 +108,13 @@ export class DuoFernAdapter extends utils.Adapter {
 
     /**
      * Called when the adapter starts up.
-     * 
+     *
      * Initializes the DuoFern stick connection, loads known devices from ioBroker objects,
      * sets up event handlers, and creates control states for adapter-level operations.
      * Validates configuration (port and stick code) before attempting to connect.
-     * 
-     * @private
+     *
      * @async
-     * @returns {Promise<void>}
+     * @returns Promise that resolves when adapter is ready
      */
     private async onReady(): Promise<void> {
         this.log.info('DuoFern adapter starting...');
@@ -124,7 +122,9 @@ export class DuoFernAdapter extends utils.Adapter {
         const port = this.config.port;
         const code = this.config.code;
 
-        this.log.info(`Configuration: port=${port}, code=${code}`);
+        const portStr = typeof port === 'string' ? port : String(port);
+        const codeStr = typeof code === 'string' ? code : String(code);
+        this.log.info(`Configuration: port=${portStr}, code=${codeStr}`);
 
         if (!port || !code) {
             const missing: string[] = [];
@@ -165,23 +165,31 @@ export class DuoFernAdapter extends utils.Adapter {
         this.stick = new DuoFernStick(port, code, knownDevices);
 
         this.stick.on('log', (level, msg) => {
-            if (level === 'info') this.log.info(msg);
-            else if (level === 'warn') this.log.warn(msg);
-            else if (level === 'error') this.log.error(msg);
-            else this.log.debug(msg);
+            if (level === 'info') {
+                this.log.info(msg);
+            } else if (level === 'warn') {
+                this.log.warn(msg);
+            } else if (level === 'error') {
+                this.log.error(msg);
+            } else {
+                this.log.debug(msg);
+            }
         });
 
         this.stick.on('initialized', () => {
             this.log.info('DuoFern stick initialized successfully');
             const currentDevices = Array.from(this.registeredDevices);
-            this.log.debug(`Stick ready with ${currentDevices.length} registered device(s): ${currentDevices.join(', ')}`);
-            this.updateConnectionStatus();
+            this.log.debug(
+                `Stick ready with ${currentDevices.length} registered device(s): ${currentDevices.join(', ')}`,
+            );
+            void this.updateConnectionStatus();
             this.isReInitializing = false;
         });
 
-        this.stick.on('error', (err) => {
-            this.log.error(`Stick error: ${err}`);
-            this.setState('info.connection', false, true);
+        this.stick.on('error', err => {
+            const errorMsg = err instanceof Error ? err.message : String(err);
+            this.log.error(`Stick error: ${errorMsg}`);
+            void this.setState('info.connection', false, true);
             // Reset re-initialization flag on error to prevent permanent blocking
             if (this.isReInitializing) {
                 this.log.warn('Resetting re-initialization flag due to error');
@@ -189,9 +197,11 @@ export class DuoFernAdapter extends utils.Adapter {
             }
         });
 
-        this.stick.on('message', (frame) => this.handleMessage(frame));
-        this.stick.on('paired', (frame) => this.handlePairing(frame, true));
-        this.stick.on('unpaired', (frame) => this.handlePairing(frame, false));
+        this.stick.on('message', frame => {
+            void this.handleMessage(frame);
+        });
+        this.stick.on('paired', frame => this.handlePairing(frame, true));
+        this.stick.on('unpaired', frame => this.handlePairing(frame, false));
 
         this.log.info(`Opening serial port: ${port}`);
 
@@ -200,7 +210,9 @@ export class DuoFernAdapter extends utils.Adapter {
             this.log.info(`Serial port ${port} opened successfully`);
         } catch (e) {
             this.log.error(`Failed to open serial port ${port}: ${e instanceof Error ? e.message : String(e)}`);
-            this.log.error(`Please check: 1) Port path is correct, 2) Device is connected, 3) User has permissions (run: sudo usermod -a -G dialout $USER)`);
+            this.log.error(
+                `Please check: 1) Port path is correct, 2) Device is connected, 3) User has permissions (run: sudo usermod -a -G dialout $USER)`,
+            );
             await this.setState('info.connection', false, true);
             // Don't continue if we can't open the port
             return;
@@ -210,35 +222,35 @@ export class DuoFernAdapter extends utils.Adapter {
         await this.setObjectNotExistsAsync('pair', {
             type: 'state',
             common: { name: 'Pairing Mode', type: 'boolean', role: 'button', read: false, write: true },
-            native: {}
+            native: {},
         });
         await this.setObjectNotExistsAsync('unpair', {
             type: 'state',
             common: { name: 'Unpairing Mode', type: 'boolean', role: 'button', read: false, write: true },
-            native: {}
+            native: {},
         });
         await this.setObjectNotExistsAsync('reopen', {
             type: 'state',
             common: { name: 'Reopen Connection', type: 'boolean', role: 'button', read: false, write: true },
-            native: {}
+            native: {},
         });
 
         await this.setObjectNotExistsAsync('remotePairByCode', {
             type: 'state',
             common: { name: 'Remote Pair by Device Code', type: 'string', role: 'text', read: true, write: true },
-            native: {}
+            native: {},
         });
 
         await this.setObjectNotExistsAsync('remotePairStatus', {
             type: 'state',
             common: { name: 'Remote Pair Status', type: 'string', role: 'text', read: true, write: false },
-            native: {}
+            native: {},
         });
 
         await this.setObjectNotExistsAsync('statusBroadcast', {
             type: 'state',
             common: { name: 'Status Broadcast', type: 'boolean', role: 'button', read: false, write: true },
-            native: {}
+            native: {},
         });
 
         this.subscribeStates('*');
@@ -246,18 +258,17 @@ export class DuoFernAdapter extends utils.Adapter {
 
     /**
      * Handles incoming message frames from the DuoFern stick.
-     * 
+     *
      * Processes status update frames (starting with 0FFF0F), extracts the device code,
      * parses the status data, and updates the corresponding ioBroker states.
      * If a new device is detected (not in registeredDevices), triggers re-initialization
      * to register the device with the stick using SetPairs command.
-     * 
-     * @private
-     * @param {string} frame - The 44-character hex frame received from the stick
+     *
+     * @param frame - The 44-character hex frame received from the stick
      */
     private async handleMessage(frame: string): Promise<void> {
         this.log.debug(`Received message frame: ${frame}`);
-        if (frame.startsWith("0FFF0F")) {
+        if (frame.startsWith('0FFF0F')) {
             const code = frame.substring(30, 36).toUpperCase();
             this.log.debug(`Status update for device ${code}`);
 
@@ -276,16 +287,15 @@ export class DuoFernAdapter extends utils.Adapter {
 
     /**
      * Schedules device registration with adaptive throttling to collect multiple devices.
-     * 
+     *
      * Instead of immediately re-initializing when a new device appears, this method
      * collects devices over a `this.REGISTRATION_THROTTLE_MS` window (2 seconds).
      * The timer is restarted each time a new device is discovered, ensuring we wait
      * a maximum of 2 seconds after the LAST device before re-initialization.
      * Once the window expires, all pending devices are registered in a single
      * re-initialization along with all already paired devices.
-     * 
-     * @private
-     * @param {string} deviceCode - The 6-digit hex device code to register
+     *
+     * @param deviceCode - The 6-digit hex device code to register
      */
     private scheduleDeviceRegistration(deviceCode: string): void {
         const normalizedCode = deviceCode.toUpperCase();
@@ -296,24 +306,27 @@ export class DuoFernAdapter extends utils.Adapter {
         // Clear existing timer if present (restart on each new device)
         if (this.registrationThrottleTimer) {
             clearTimeout(this.registrationThrottleTimer);
-            this.log.info(`Scheduled registration for ${normalizedCode} (${deviceCount} device${deviceCount > 1 ? 's' : ''} pending, timer restarted)`);
+            this.log.info(
+                `Scheduled registration for ${normalizedCode} (${deviceCount} device${deviceCount > 1 ? 's' : ''} pending, timer restarted)`,
+            );
         } else {
-            this.log.info(`Scheduled registration for ${normalizedCode} (${deviceCount} device${deviceCount > 1 ? 's' : ''} pending, timer started)`);
+            this.log.info(
+                `Scheduled registration for ${normalizedCode} (${deviceCount} device${deviceCount > 1 ? 's' : ''} pending, timer started)`,
+            );
         }
 
         // Set new timer
         this.registrationThrottleTimer = setTimeout(() => {
-            this.processPendingRegistrations();
+            void this.processPendingRegistrations();
         }, this.REGISTRATION_THROTTLE_MS);
     }
 
     /**
      * Processes all pending device registrations by re-initializing the stick.
-     * 
+     *
      * This is necessary because the stick needs to know about all devices via SetPairs
      * commands during initialization. Without this, commands are ACKed but not forwarded.
-     * 
-     * @private
+     *
      * @async
      */
     private async processPendingRegistrations(): Promise<void> {
@@ -325,7 +338,7 @@ export class DuoFernAdapter extends utils.Adapter {
             this.log.warn('Re-initialization already in progress, deferring pending registrations');
             // Reschedule for later
             this.registrationThrottleTimer = setTimeout(() => {
-                this.processPendingRegistrations();
+                void this.processPendingRegistrations();
             }, this.REGISTRATION_THROTTLE_MS);
             return;
         }
@@ -339,7 +352,9 @@ export class DuoFernAdapter extends utils.Adapter {
 
         const devicesToRegister = Array.from(this.pendingDeviceRegistrations);
         const attemptNumber = this.registrationRetryCount + 1;
-        this.log.info(`Processing registration for ${devicesToRegister.length} device(s): ${devicesToRegister.join(', ')} (attempt ${attemptNumber}/${this.MAX_REGISTRATION_RETRIES})`);
+        this.log.info(
+            `Processing registration for ${devicesToRegister.length} device(s): ${devicesToRegister.join(', ')} (attempt ${attemptNumber}/${this.MAX_REGISTRATION_RETRIES})`,
+        );
 
         try {
             this.isReInitializing = true;
@@ -359,11 +374,14 @@ export class DuoFernAdapter extends utils.Adapter {
             await this.stick.reopen(Array.from(this.registeredDevices));
 
             this.log.info(`Stick re-initialized successfully with ${devicesToRegister.length} new device(s)`);
-            this.updateConnectionStatus();
+            await this.updateConnectionStatus();
             // Reset retry count on success
             this.registrationRetryCount = 0;
         } catch (err) {
-            this.log.error(`Failed to re-initialize stick (attempt ${this.registrationRetryCount + 1}/${this.MAX_REGISTRATION_RETRIES}): ${err}`);
+            const errorMsg = err instanceof Error ? err.message : String(err);
+            this.log.error(
+                `Failed to re-initialize stick (attempt ${this.registrationRetryCount + 1}/${this.MAX_REGISTRATION_RETRIES}): ${errorMsg}`,
+            );
             // Reset flag to prevent permanent blocking
             this.isReInitializing = false;
             // Remove failed devices from registered list
@@ -372,7 +390,9 @@ export class DuoFernAdapter extends utils.Adapter {
             // Check retry limit
             this.registrationRetryCount++;
             if (this.registrationRetryCount >= this.MAX_REGISTRATION_RETRIES) {
-                this.log.error(`Maximum registration retries (${this.MAX_REGISTRATION_RETRIES}) reached. Giving up on devices: ${devicesToRegister.join(', ')}`);
+                this.log.error(
+                    `Maximum registration retries (${this.MAX_REGISTRATION_RETRIES}) reached. Giving up on devices: ${devicesToRegister.join(', ')}`,
+                );
                 this.pendingDeviceRegistrations.clear();
                 this.registrationRetryCount = 0;
                 return;
@@ -383,21 +403,20 @@ export class DuoFernAdapter extends utils.Adapter {
             const backoffDelay = this.REGISTRATION_THROTTLE_MS * Math.pow(2, this.registrationRetryCount - 1);
             this.log.info(`Retrying in ${backoffDelay / 1000} seconds...`);
             this.registrationThrottleTimer = setTimeout(() => {
-                this.processPendingRegistrations();
+                void this.processPendingRegistrations();
             }, backoffDelay);
         }
     }
 
     /**
      * Handles device pairing and unpairing events.
-     * 
+     *
      * Extracts the device code from the frame and updates the device states
      * to reflect the paired/unpaired status. For paired devices, triggers registration.
-     * 
-     * @private
+     *
      * @async
-     * @param {string} frame - The pairing/unpairing frame (0602... or 0603...)
-     * @param {boolean} paired - True if device was paired, false if unpaired
+     * @param frame - The pairing/unpairing frame (0602... or 0603...)
+     * @param paired - True if device was paired, false if unpaired
      */
     private async handlePairing(frame: string, paired: boolean): Promise<void> {
         // 0602... or 0603...
@@ -419,15 +438,14 @@ export class DuoFernAdapter extends utils.Adapter {
 
     /**
      * Updates or creates ioBroker states for a DuoFern device.
-     * 
+     *
      * Creates the device object if it doesn't exist, then creates/updates all necessary
      * state objects based on centralized capability definitions from the capabilities module.
      * This eliminates hardcoded state definitions and type guessing.
-     * 
-     * @private
+     *
      * @async
-     * @param {string} code - The 6-digit hex device code
-     * @param {Record<string, string | number | boolean>} status - Object containing status key-value pairs from parsed frame
+     * @param code - The 6-digit hex device code
+     * @param status - Object containing status key-value pairs from parsed frame
      */
     private async updateDeviceStates(code: string, status: Record<string, string | number | boolean>): Promise<void> {
         await this.setObjectNotExistsAsync(code, {
@@ -500,7 +518,7 @@ export class DuoFernAdapter extends utils.Adapter {
         for (const [key, value] of Object.entries(status)) {
             // Only update states that have capability definitions
             if (capabilities[key]) {
-                await this.setState(`${code}.${key}`, value as string | number | boolean, true);
+                await this.setState(`${code}.${key}`, value, true);
             } else {
                 this.log.debug(`Received unknown status field: ${key} = ${value}`);
             }
@@ -509,7 +527,7 @@ export class DuoFernAdapter extends utils.Adapter {
         // If position changed or we received a moving status from device, reset moving state
         if (positionChanged || status.moving !== undefined) {
             // The parser always returns "stop" for moving (correct behavior), so we use that
-            const movingState = status.moving || "stop";
+            const movingState = status.moving || 'stop';
             this.log.debug(`Updating moving state for ${code}: ${movingState} (position changed: ${positionChanged})`);
             await this.setState(`${code}.moving`, movingState, true);
         }
@@ -517,22 +535,23 @@ export class DuoFernAdapter extends utils.Adapter {
 
     /**
      * Handles state changes triggered by the user or other adapters.
-     * 
+     *
      * This is the main command handler that translates ioBroker state changes into
      * DuoFern protocol commands. Handles:
      * - Adapter-level commands (pair, unpair, reopen, statusBroadcast)
      * - Device-level commands (up, down, stop, position, toggle, getStatus)
      * - Mode and automatic settings (sunMode, manualMode, timeAutomatic, etc.)
      * - Device name changes and remote pairing
-     * 
-     * @private
+     *
      * @async
-     * @param {string} id - The state ID that changed
-     * @param {ioBroker.State | null | undefined} state - The new state value
-     * @returns {Promise<void>}
+     * @param id - The state ID that changed
+     * @param state - The new state value
+     * @returns Promise that resolves when command is processed
      */
     private async onStateChange(id: string, state: ioBroker.State | null | undefined): Promise<void> {
-        if (!state || state.ack) return;
+        if (!state || state.ack) {
+            return;
+        }
 
         const parts = id.split('.');
         const deviceId = parts[2]; // adapter.instance.device.state
@@ -578,7 +597,9 @@ export class DuoFernAdapter extends utils.Adapter {
                         await this.stick.reopen();
                         this.log.info('Connection reopened and reinitialized successfully');
                     } catch (err) {
-                        this.log.error(`Failed to reopen connection: ${err instanceof Error ? err.message : String(err)}`);
+                        this.log.error(
+                            `Failed to reopen connection: ${err instanceof Error ? err.message : String(err)}`,
+                        );
                     }
                 } else {
                     this.log.warn('Stick not initialized, cannot reopen connection');
@@ -626,7 +647,7 @@ export class DuoFernAdapter extends utils.Adapter {
             }
             await this.setState('remotePairStatus', `Sending remote pair for ${codeVal}`, true);
             const frames = buildRemotePairFrames(codeVal);
-            frames.forEach((f) => {
+            frames.forEach(f => {
                 this.log.debug(`Built remote pair frame: ${f}`);
                 this.stick?.write(f);
             });
@@ -666,7 +687,7 @@ export class DuoFernAdapter extends utils.Adapter {
                 deviceId.toUpperCase(),
                 this.config.code.toUpperCase(),
                 command,
-                state.val
+                state.val,
             );
 
             if (result.success) {
@@ -686,7 +707,7 @@ export class DuoFernAdapter extends utils.Adapter {
                     } else if (command === 'position' && typeof state.val === 'number') {
                         // Update moving state based on target vs current position
                         const currentPosition = await this.getStateAsync(`${deviceId}.position`);
-                        const currentVal = currentPosition?.val as number || 0;
+                        const currentVal = (currentPosition?.val as number) || 0;
                         if (state.val > currentVal) {
                             await this.setState(`${deviceId}.moving`, 'down', true);
                         } else if (state.val < currentVal) {
@@ -700,7 +721,7 @@ export class DuoFernAdapter extends utils.Adapter {
                 // Handle multi-frame commands
                 if (result.frames) {
                     this.log.info(`Sending ${command} command to device ${deviceId} (${result.frames.length} frames)`);
-                    result.frames.forEach((frame) => {
+                    result.frames.forEach(frame => {
                         this.log.debug(`Built command frame: ${frame}`);
                         this.stick?.write(frame);
                     });
@@ -718,12 +739,10 @@ export class DuoFernAdapter extends utils.Adapter {
 
     /**
      * Called when the adapter is shutting down.
-     * 
+     *
      * Cleans up resources including button reset timers and closes the serial port connection.
-     * 
-     * @private
-     * @param {() => void} callback - Callback to signal shutdown completion
-     * @returns {void}
+     *
+     * @param callback - Callback to signal shutdown completion
      */
     private onUnload(callback: () => void): void {
         this.log.info('Shutting down DuoFern adapter...');
@@ -741,12 +760,13 @@ export class DuoFernAdapter extends utils.Adapter {
         }
 
         if (this.stick) {
-            this.stick.close()
+            this.stick
+                .close()
                 .then(() => {
                     this.log.info('Serial port closed');
                     callback();
                 })
-                .catch((err) => {
+                .catch(err => {
                     this.log.error(`Error closing serial port: ${err}`);
                     callback();
                 });
@@ -758,11 +778,11 @@ export class DuoFernAdapter extends utils.Adapter {
 
 /**
  * Factory function to create and start the DuoFern adapter instance.
- * 
+ *
  * This function is called by ioBroker to instantiate the adapter.
- * 
- * @param {Partial<utils.AdapterOptions> | undefined} options - Adapter options from ioBroker
- * @returns {DuoFernAdapter} The adapter instance
+ *
+ * @param options - Adapter options from ioBroker
+ * @returns The adapter instance
  */
 function startAdapter(options: Partial<utils.AdapterOptions> | undefined): DuoFernAdapter {
     return new DuoFernAdapter(options);
@@ -770,7 +790,8 @@ function startAdapter(options: Partial<utils.AdapterOptions> | undefined): DuoFe
 
 if (require.main !== module) {
     // Export using the pattern ioBroker expects
-    module.exports = (options: Partial<utils.AdapterOptions> | undefined): DuoFernAdapter => new DuoFernAdapter(options);
+    module.exports = (options: Partial<utils.AdapterOptions> | undefined): DuoFernAdapter =>
+        new DuoFernAdapter(options);
 } else {
     // Manual start for testing
     startAdapter(undefined);

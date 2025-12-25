@@ -5,12 +5,12 @@ spec: 'test/**/*.test.ts'
 
 # Require ts-node for TypeScript support with transpile-only for speed
 require:
-  - 'ts-node/register/transpile-only'
+    - 'ts-node/register/transpile-only'
 
 # Use ts-node loader for TypeScript support and suppress deprecation warnings
 node-option:
-  - 'loader=ts-node/esm'
-  - 'no-warnings'
+    - 'loader=ts-node/esm'
+    - 'no-warnings'
 
 # Test environment
 ui: 'bdd'

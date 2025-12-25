@@ -42,6 +42,7 @@
         "@types/iobroker": "npm:@iobroker/types@^7.1.0",
         "@types/node": "^20.19.27",
         "nyc": "^17.1.0",
+        "prettier": "^3.7.4",
         "rimraf": "^6.1.2",
         "source-map-support": "^0.5.21",
         "ts-node": "^10.9.2",
@@ -70,6 +71,7 @@
         "check": "tsc --noEmit",
         "coverage": "nyc npm run test:ts",
         "lint": "eslint -c eslint.config.mjs .",
+        "format": "prettier --write .",
         "translate": "translate-adapter",
         "release": "release-script",
         "dev-server": "dev-server"

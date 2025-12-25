@@ -1,6 +1,6 @@
 /**
  * Unit tests for the capabilities module
- * 
+ *
  * Validates state definitions, capability extraction, and type inference
  * to ensure the single source of truth for device capabilities is correct.
  */
@@ -99,7 +99,11 @@ describe('capabilities', () => {
             // runningTime has no entry in getStatusFieldMapping, should default to number
             assert.ok(definitions.runningTime, 'runningTime should exist');
             assert.strictEqual(definitions.runningTime.type, 'number', 'runningTime should default to number type');
-            assert.strictEqual(definitions.runningTime.role, 'indicator', 'runningTime should be indicator (not writable)');
+            assert.strictEqual(
+                definitions.runningTime.role,
+                'indicator',
+                'runningTime should be indicator (not writable)',
+            );
             assert.strictEqual(definitions.runningTime.readable, true);
             assert.strictEqual(definitions.runningTime.writable, false);
         });
@@ -192,13 +196,7 @@ describe('capabilities', () => {
         it('should have proper units for position-like fields', () => {
             const definitions = getStateDefinitions();
 
-            const positionFields = [
-                'position',
-                'sunPosition',
-                'ventilatingPosition',
-                'slatPosition',
-                'defaultSlatPos'
-            ];
+            const positionFields = ['position', 'sunPosition', 'ventilatingPosition', 'slatPosition', 'defaultSlatPos'];
 
             for (const field of positionFields) {
                 if (definitions[field]) {
@@ -219,7 +217,7 @@ describe('capabilities', () => {
                 'dawnAutomatic',
                 'manualMode',
                 'sunMode',
-                'ventilatingMode'
+                'ventilatingMode',
             ];
 
             for (const state of booleanStates) {
@@ -303,7 +301,10 @@ describe('capabilities', () => {
             assert.ok(!actuatorDefs.up, 'Actuators should NOT have up');
 
             // Sensors should have minimal states
-            assert.ok(Object.keys(sensorDefs).length < Object.keys(blindsDefs).length, 'Sensors should have fewer states than blinds');
+            assert.ok(
+                Object.keys(sensorDefs).length < Object.keys(blindsDefs).length,
+                'Sensors should have fewer states than blinds',
+            );
             assert.ok(sensorDefs.getStatus, 'Sensors should have getStatus');
             assert.ok(sensorDefs.remotePair, 'Sensors should have remotePair');
             assert.ok(!sensorDefs.position, 'Sensors should NOT have position');
@@ -324,25 +325,32 @@ describe('capabilities', () => {
         it('should only include venetian blind features for devices that support blindsMode', () => {
             // Devices that support venetian blind features (slat control)
             const venetianDevices = {
-                '42': 'Rohrmotor-Aktor',
+                42: 'Rohrmotor-Aktor',
                 '4B': 'Connect-Aktor',
                 '4C': 'Troll Basis',
-                '70': 'Troll Comfort DuoFern'
+                70: 'Troll Comfort DuoFern',
             };
 
             // Regular blind devices without venetian blind support
             const regularBlindDevices = {
-                '40': 'RolloTron Standard',
-                '41': 'RolloTron Comfort Slave',
-                '47': 'Rohrmotor Steuerung',
-                '49': 'Rohrmotor',
-                '61': 'RolloTron Comfort Master',
-                '62': 'Unspecified device'
+                40: 'RolloTron Standard',
+                41: 'RolloTron Comfort Slave',
+                47: 'Rohrmotor Steuerung',
+                49: 'Rohrmotor',
+                61: 'RolloTron Comfort Master',
+                62: 'Unspecified device',
             };
 
             const venetianStates = [
-                'slatRunTime', 'tiltAfterMoveLevel', 'tiltInVentPos', 'defaultSlatPos',
-                'tiltAfterStopDown', 'motorDeadTime', 'tiltInSunPos', 'slatPosition', 'blindsMode'
+                'slatRunTime',
+                'tiltAfterMoveLevel',
+                'tiltInVentPos',
+                'defaultSlatPos',
+                'tiltAfterStopDown',
+                'motorDeadTime',
+                'tiltInSunPos',
+                'slatPosition',
+                'blindsMode',
             ];
 
             // Test venetian blind devices - should have slat states
@@ -491,7 +499,7 @@ describe('capabilities', () => {
                 'duskAutomatic',
                 'dawnAutomatic',
                 'rainAutomatic',
-                'windAutomatic'
+                'windAutomatic',
             ];
 
             for (const auto of automatics) {
@@ -502,13 +510,7 @@ describe('capabilities', () => {
         it('should cover mode settings', () => {
             const definitions = getStateDefinitions();
 
-            const modes = [
-                'manualMode',
-                'sunMode',
-                'ventilatingMode',
-                'windMode',
-                'rainMode'
-            ];
+            const modes = ['manualMode', 'sunMode', 'ventilatingMode', 'windMode', 'rainMode'];
 
             for (const mode of modes) {
                 assert.ok(definitions[mode], `Missing mode: ${mode}`);
@@ -554,7 +556,7 @@ describe('capabilities', () => {
                 'duskAutomatic',
                 'dawnAutomatic',
                 'rainAutomatic',
-                'windAutomatic'
+                'windAutomatic',
             ];
 
             for (const setting of writableSettings) {

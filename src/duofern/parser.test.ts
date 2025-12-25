@@ -1,9 +1,8 @@
 /**
  * @file Parser Test Suite
- * 
+ *
  * Unit tests for the DuoFern protocol parser.
  * Tests status frame parsing focusing on actual frame structures.
- * 
  * @module test/parser.test
  * @author Patrick Gläßer
  * @license MIT
@@ -20,14 +19,14 @@ describe('DuoFern Parser', () => {
         });
 
         it('should handle unknown format', () => {
-            const frame = '0FFF0FFF' + '0000'.repeat(9);
+            const frame = `0FFF0FFF${'0000'.repeat(9)}`;
             const result = parseStatus(frame);
             assert.deepStrictEqual(result, {});
         });
 
         it('should parse format 21 frame', () => {
             // Real format 21 frame structure
-            const frame = '0FFF0F21' + '0000'.repeat(9);
+            const frame = `0FFF0F21${'0000'.repeat(9)}`;
             const result = parseStatus(frame);
 
             // Should have some fields from format 21
@@ -35,21 +34,21 @@ describe('DuoFern Parser', () => {
         });
 
         it('should parse format 23 frame', () => {
-            const frame = '0FFF0F23' + '0000'.repeat(9);
+            const frame = `0FFF0F23${'0000'.repeat(9)}`;
             const result = parseStatus(frame);
 
             assert.ok(typeof result === 'object');
         });
 
         it('should parse format 24 frame', () => {
-            const frame = '0FFF0F24' + '0000'.repeat(9);
+            const frame = `0FFF0F24${'0000'.repeat(9)}`;
             const result = parseStatus(frame);
 
             assert.ok(typeof result === 'object');
         });
 
         it('should return empty object for invalid hex', () => {
-            const frame = '0FFF0F21GGGG' + '0000'.repeat(8);
+            const frame = `0FFF0F21GGGG${'0000'.repeat(8)}`;
             const result = parseStatus(frame);
 
             // Should not throw, may return partial result
@@ -62,11 +61,11 @@ describe('DuoFern Parser', () => {
             const frame = '0FFF0F21' + '0000000000000000003200000000000000';
             const result = parseStatus(frame);
 
-            assert.ok(result.hasOwnProperty('position') || Object.keys(result).length >= 0);
+            assert.ok(Object.prototype.hasOwnProperty.call(result, 'position') || Object.keys(result).length >= 0);
         });
 
         it('should handle frames with multiple data fields', () => {
-            const frame = '0FFF0F21' + 'ABCD'.repeat(9);
+            const frame = `0FFF0F21${'ABCD'.repeat(9)}`;
             const result = parseStatus(frame);
 
             assert.ok(typeof result === 'object');
@@ -76,7 +75,7 @@ describe('DuoFern Parser', () => {
         it('should apply inversion to position values', () => {
             // Format 21, position at byte 7 (offset 14) with value 0x00 should invert to 100
             // Position is bits 0-6 of 2-byte value at offset 7
-            const frame = '0FFF0F21' + '00'.repeat(6) + '00' + '00' + '00';
+            const frame = `0FFF0F21${'00'.repeat(6)}00` + `00` + `00`;
             const result = parseStatus(frame);
 
             assert.strictEqual(result.position, 100, 'Position 0x00 should invert to 100');
@@ -85,7 +84,7 @@ describe('DuoFern Parser', () => {
         it('should extract and map boolean values', () => {
             // Format 21, status values are extracted from frame data
             // Just verify the function extracts and maps boolean fields
-            const frame = '0FFF0F21' + '00'.repeat(9);
+            const frame = `0FFF0F21${'00'.repeat(9)}`;
             const result = parseStatus(frame);
 
             // Should have extracted and mapped some values
@@ -96,10 +95,10 @@ describe('DuoFern Parser', () => {
             // Format 21, position at byte offset 7 (char index 6+7*2=20)
             // Parser reads 16-bit value and extracts bits 0-6 from lower byte
             // Value 0x0032 has bits 0-6 = 50, inverts to 100-50=50
-            let frame = '0FFF0F21';       // indices 0-7 (4 bytes: header + format)
-            frame += '00'.repeat(6);      // indices 8-19 (bytes 0-5)
-            frame += '0032';              // indices 20-23 (16-bit value with position=0x32 in lower byte)
-            frame += '00'.repeat(10);     // indices 24-43 (remaining bytes to reach 44 chars)
+            let frame = '0FFF0F21'; // indices 0-7 (4 bytes: header + format)
+            frame += '00'.repeat(6); // indices 8-19 (bytes 0-5)
+            frame += '0032'; // indices 20-23 (16-bit value with position=0x32 in lower byte)
+            frame += '00'.repeat(10); // indices 24-43 (remaining bytes to reach 44 chars)
 
             const result = parseStatus(frame);
             assert.strictEqual(result.position, 50, 'Position 0x32 (50) inverted should be 50');
@@ -108,13 +107,11 @@ describe('DuoFern Parser', () => {
         it('should extract sunMode and ventilatingMode flags', () => {
             // Format 21: test that boolean flags are extracted and mapped
             // This test verifies the mapping logic works without relying on exact byte positions
-            const frame = '0FFF0F21' + 'FF'.repeat(9);
+            const frame = `0FFF0F21${'FF'.repeat(9)}`;
             const result = parseStatus(frame);
 
             // Verify that onOff-mapped fields return boolean values (true/false)
-            const hasBoolean = Object.entries(result).some(([key, val]) =>
-                typeof val === 'boolean'
-            );
+            const hasBoolean = Object.entries(result).some(([_key, val]) => typeof val === 'boolean');
             assert.ok(hasBoolean, 'Should have at least one boolean status field');
         });
 
@@ -122,7 +119,7 @@ describe('DuoFern Parser', () => {
             // Format 23 includes different status IDs
             // Byte 3 bit 5 = manualMode, bit 0 = timeAutomatic
             // Set both: 0x21 = 0b00100001
-            const frame = '0FFF0F23' + '00'.repeat(2) + '21' + '00'.repeat(6);
+            const frame = `0FFF0F23${'00'.repeat(2)}21${'00'.repeat(6)}`;
             const result = parseStatus(frame);
 
             assert.ok(typeof result === 'object');
@@ -132,7 +129,7 @@ describe('DuoFern Parser', () => {
         it('should extract multiple automatics from format 23', () => {
             // Format 23 with various automatic flags set
             // This tests the multiple statusIds in format 23
-            const frame = '0FFF0F23' + '07' + '0F' + '00'.repeat(7);
+            const frame = `0FFF0F23` + `07` + `0F${'00'.repeat(7)}`;
             const result = parseStatus(frame);
 
             // Should have extracted multiple fields
@@ -141,7 +138,7 @@ describe('DuoFern Parser', () => {
 
         it('should handle format 24 with wind and rain modes', () => {
             // Format 24 includes windMode and rainMode
-            const frame = '0FFF0F24' + '00'.repeat(9);
+            const frame = `0FFF0F24${'00'.repeat(9)}`;
             const result = parseStatus(frame);
 
             assert.ok(typeof result === 'object');
@@ -149,7 +146,7 @@ describe('DuoFern Parser', () => {
 
         it('should extract moving status correctly', () => {
             // Moving is always mapped to "stop" per the code comment
-            const frame = '0FFF0F21' + '01' + '00'.repeat(8);
+            const frame = `0FFF0F21` + `01${'00'.repeat(8)}`;
             const result = parseStatus(frame);
 
             if ('moving' in result) {
@@ -160,7 +157,7 @@ describe('DuoFern Parser', () => {
         it('should handle ventilating position with inversion', () => {
             // Format 21, ventilatingPosition should be inverted from 100
             // Test that the inversion logic is applied
-            const frame = '0FFF0F21' + '00'.repeat(9);
+            const frame = `0FFF0F21${'00'.repeat(9)}`;
             const result = parseStatus(frame);
 
             if ('ventilatingPosition' in result) {
@@ -173,7 +170,7 @@ describe('DuoFern Parser', () => {
         it('should extract runningTime from format 23', () => {
             // Format 23 includes runningTime field
             // Test that numeric fields are extracted correctly
-            const frame = '0FFF0F23' + 'AB'.repeat(9);
+            const frame = `0FFF0F23${'AB'.repeat(9)}`;
             const result = parseStatus(frame);
 
             // Should extract some numeric values from format 23
@@ -187,10 +184,10 @@ describe('DuoFern Parser', () => {
             // Format 23, position 6, bits 0-7 (full byte, extracts bits 0-7 from 16-bit value)
             // Position 6 means index 6 + 6*2 = 18, so chars 18-21 (16-bit value)
             // Bits 0-7 means lower byte of the 16-bit value
-            let frame = '0FFF0F23';       // Format 23 (chars 0-7)
-            frame += '00'.repeat(6);      // positions 0-5 (chars 8-19)
-            frame += 'AA00';              // position 6 (chars 20-23): 0xAA00, bits 0-7 = 0xAA = 170
-            frame += '00'.repeat(3);      // padding (chars 24-29)
+            let frame = '0FFF0F23'; // Format 23 (chars 0-7)
+            frame += '00'.repeat(6); // positions 0-5 (chars 8-19)
+            frame += 'AA00'; // position 6 (chars 20-23): 0xAA00, bits 0-7 = 0xAA = 170
+            frame += '00'.repeat(3); // padding (chars 24-29)
 
             const result = parseStatus(frame);
 
@@ -201,7 +198,7 @@ describe('DuoFern Parser', () => {
         it('should skip status IDs with missing definitions', () => {
             // Format 22 references status IDs 1-10 which don't exist in statusIds
             // This tests the `if (!def) continue;` branch at line 188
-            const frame = '0FFF0F22' + '0000'.repeat(9);
+            const frame = `0FFF0F22${'0000'.repeat(9)}`;
             const result = parseStatus(frame);
 
             // Should return empty object since all IDs are undefined
@@ -217,7 +214,7 @@ describe('DuoFern Parser', () => {
             // The branch exists at line 191: `if (!chanDef) continue;`
 
             // We can verify the current behavior works correctly with existing data
-            const frame = '0FFF0F21' + '0000'.repeat(9);
+            const frame = `0FFF0F21${'0000'.repeat(9)}`;
             const result = parseStatus(frame);
 
             // All format 21 fields should have channel 01 defined, so this extracts normally
@@ -229,11 +226,11 @@ describe('DuoFern Parser', () => {
             // Format 23 includes this field at position 2, bits 4-5
             // Test with value 3 (bits 4-5 = 11 binary) to get "individual"
             // Position 2 means index 6 + 2*2 = 10, so chars 10-13
-            let frame = '0FFF0F23';     // Format 23
-            frame += '00';               // position 0
-            frame += '00';               // position 1  
-            frame += '30';               // position 2: 0x30 = 0011 0000, bits 4-5 = 11 = value 3
-            frame += '00'.repeat(7);     // padding
+            let frame = '0FFF0F23'; // Format 23
+            frame += '00'; // position 0
+            frame += '00'; // position 1
+            frame += '30'; // position 2: 0x30 = 0011 0000, bits 4-5 = 11 = value 3
+            frame += '00'.repeat(7); // padding
 
             const result = parseStatus(frame);
 
@@ -247,12 +244,13 @@ describe('DuoFern Parser', () => {
             // This tests line 231: `else` branch when `value >= map.length`
             // Format 24a includes automaticClosing at position 1, bits 0-3
             // Position 1 means index 6 + 1*2 = 8, so chars 8-11
-            let frame = '0FFF0F24';     // Format must be "24" (hex byte 0x24)
-            frame += '00';               // position 0
-            frame += '0F';               // position 1 byte 1: 0x0F = value 15 in bits 0-3
-            frame += '00'.repeat(8);     // padding to 44 chars
+            let frame = '0FFF0F24'; // Format must be "24" (hex byte 0x24)
+            frame += '00'; // position 0
+            frame += '0F'; // position 1 byte 1: 0x0F = value 15 in bits 0-3
+            frame += '00'.repeat(8); // padding to 44 chars
 
-            const result = parseStatus(frame);
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const _result = parseStatus(frame);
 
             // Since format 24 has automaticClosing support, value 15 > closeT.length (9)
             // Should return raw value 15 instead of trying to map it

@@ -1,13 +1,14 @@
 /**
  * @file DuoFern Command Dispatcher
- * 
+ *
  * Provides centralized command execution logic that maps ioBroker state changes
  * to DuoFern protocol commands. This eliminates the need for hardcoded command
  * handling in the adapter layer.
  */
 
-import { buildCommand, buildStatusRequest, buildRemotePairFrames } from './protocol';
-import { getDeviceStateDefinitions, StateDefinition } from './capabilities';
+import type { StateDefinition } from './capabilities';
+import { getDeviceStateDefinitions } from './capabilities';
+import { buildCommand, buildRemotePairFrames, buildStatusRequest } from './protocol';
 
 /**
  * Result of a command execution attempt.
@@ -27,14 +28,14 @@ export interface CommandResult {
 
 /**
  * Centralized command dispatcher for DuoFern devices.
- * 
+ *
  * Translates high-level commands (state changes) into low-level protocol frames
  * by using capability definitions as the single source of truth.
  */
 export class CommandDispatcher {
     /**
      * Execute a command for a device.
-     * 
+     *
      * @param deviceCode - 6-digit hex device code
      * @param stickCode - 6-digit hex stick code
      * @param commandName - State name (e.g., 'up', 'sunMode', 'position')
@@ -45,7 +46,7 @@ export class CommandDispatcher {
         deviceCode: string,
         stickCode: string,
         commandName: string,
-        value: boolean | number | string
+        value: boolean | number | string,
     ): CommandResult {
         // Special handling for status request broadcast (uses special frame format)
         if (commandName === 'getStatus' && value === true) {
@@ -95,7 +96,10 @@ export class CommandDispatcher {
         } else if (capability.type === 'boolean') {
             commandType = 'booleanToggle';
         } else {
-            return { success: false, error: `Cannot derive command type from role=${capability.role}, type=${capability.type}` };
+            return {
+                success: false,
+                error: `Cannot derive command type from role=${capability.role}, type=${capability.type}`,
+            };
         }
 
         try {
@@ -117,12 +121,21 @@ export class CommandDispatcher {
     /**
      * Handle button command execution.
      * Buttons require a true value to trigger.
+     *
+     * @param mapping - State definition command mapping
+     * @param frameOpts - Frame building options
+     * @param frameOpts.deviceCode - Device code
+     * @param frameOpts.stickCode - Stick code
+     * @param frameOpts.channel - Device channel
+     * @param frameOpts.suffix - Command suffix
+     * @param value - Value to validate (must be true)
+     * @param role - State role definition
      */
     private static handleButton(
         mapping: StateDefinition['commandMapping'],
         frameOpts: { deviceCode: string; stickCode: string; channel: string; suffix: string },
         value: unknown,
-        role: StateDefinition['role']
+        role: StateDefinition['role'],
     ): CommandResult {
         if (value !== true) {
             return { success: false, error: 'Button commands require true value' };
@@ -143,11 +156,19 @@ export class CommandDispatcher {
     /**
      * Handle boolean toggle command execution.
      * Maps true → commandOn, false → commandOff.
+     *
+     * @param mapping - State definition command mapping
+     * @param frameOpts - Frame building options
+     * @param frameOpts.deviceCode - Device code
+     * @param frameOpts.stickCode - Stick code
+     * @param frameOpts.channel - Device channel
+     * @param frameOpts.suffix - Command suffix
+     * @param value - Boolean value to map to command
      */
     private static handleBooleanToggle(
         mapping: StateDefinition['commandMapping'],
         frameOpts: { deviceCode: string; stickCode: string; channel: string; suffix: string },
-        value: unknown
+        value: unknown,
     ): CommandResult {
         if (typeof value !== 'boolean') {
             return { success: false, error: 'Boolean toggle requires boolean value' };
@@ -165,11 +186,19 @@ export class CommandDispatcher {
     /**
      * Handle numeric level command execution.
      * Validates range and maps to protocol position value.
+     *
+     * @param mapping - State definition command mapping
+     * @param frameOpts - Frame building options
+     * @param frameOpts.deviceCode - Device code
+     * @param frameOpts.stickCode - Stick code
+     * @param frameOpts.channel - Device channel
+     * @param frameOpts.suffix - Command suffix
+     * @param value - Numeric value to validate and map
      */
     private static handleNumericLevel(
         mapping: StateDefinition['commandMapping'],
         frameOpts: { deviceCode: string; stickCode: string; channel: string; suffix: string },
-        value: unknown
+        value: unknown,
     ): CommandResult {
         if (typeof value !== 'number') {
             return { success: false, error: 'Numeric level requires number value' };

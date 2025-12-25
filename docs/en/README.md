@@ -11,7 +11,9 @@ Adapter to connect Rademacher DuoFern devices via DuoFern USB Stick.
 ## Configuration
 
 ### Serial Port
+
 Specify the path to the serial port where your DuoFern USB stick is connected:
+
 - Linux: `/dev/ttyUSB0` or `/dev/serial/by-id/...`
 - Windows: `COM1`, `COM2`, etc.
 
@@ -20,14 +22,16 @@ Specify the path to the serial port where your DuoFern USB stick is connected:
 **Tip**: On Linux, it is highly recommended to use the path in `/dev/serial/by-id/` instead of `/dev/ttyUSB0`, as it is persistent and more stable across reboots. Use `ls -l /dev/serial/by-id/` to find the correct path.
 
 ### DuoFern Stick Code
+
 Enter the 6-digit hexadecimal code of your DuoFern stick:
+
 - Must start with `6F`
 - Last 4 digits are freely configurable (e.g., `6F1234`)
 
 ## Supported Devices
 
 - **Blinds/Roller Shutters**: Basic control (up, down, stop, position, other commands may work, but untested)
-  - *Note: Currently, this adapter is only tested with blinds/roller shutters.*
+    - _Note: Currently, this adapter is only tested with blinds/roller shutters._
 
 ## Usage
 
@@ -39,11 +43,13 @@ Enter the 6-digit hexadecimal code of your DuoFern stick:
 ## Troubleshooting
 
 ### Device not found
+
 - Check serial port path and permissions
 - Verify stick code is correct
 - Ensure USB stick is properly connected
 
 ### Device not responding
+
 - Check if device is within radio range
 - Verify device is properly paired
 - Check adapter logs for error messages

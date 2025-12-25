@@ -16,9 +16,9 @@ Thank you for considering contributing to ioBroker.duofern! We welcome contribut
 This project follows [Semantic Versioning](https://semver.org/) (SemVer).
 Version numbers are in the format `MAJOR.MINOR.PATCH`.
 
-*   **MAJOR** version when you make incompatible API changes,
-*   **MINOR** version when you add functionality in a backwards compatible manner, and
-*   **PATCH** version when you make backwards compatible bug fixes.
+- **MAJOR** version when you make incompatible API changes,
+- **MINOR** version when you add functionality in a backwards compatible manner, and
+- **PATCH** version when you make backwards compatible bug fixes.
 
 ## Commit Messages
 

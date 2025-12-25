@@ -33,13 +33,13 @@ const newVersion = bumpVersion(oldVersion, versionType);
 
 // Update package.json
 packageJson.version = newVersion;
-fs.writeFileSync(packagePath, JSON.stringify(packageJson, null, 4) + '\n');
+fs.writeFileSync(packagePath, `${JSON.stringify(packageJson, null, 4)}\n`);
 
 // Read and update io-package.json
 const ioPackagePath = path.join(__dirname, '..', 'io-package.json');
 const ioPackageJson = JSON.parse(fs.readFileSync(ioPackagePath, 'utf8'));
 ioPackageJson.common.version = newVersion;
-fs.writeFileSync(ioPackagePath, JSON.stringify(ioPackageJson, null, 4) + '\n');
+fs.writeFileSync(ioPackagePath, `${JSON.stringify(ioPackageJson, null, 4)}\n`);
 
 console.log(`✓ Version bumped from ${oldVersion} to ${newVersion}`);
 console.log(`  - package.json: ${newVersion}`);

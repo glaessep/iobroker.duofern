@@ -11,6 +11,7 @@ Write your commit message for the **staged files/changes** using the **Conventio
 **Output the commit message in a single markdown code block with NO additional commentary.**
 
 ### ❌ WRONG - Do NOT output:
+
 ```
 Here's your commit message:
 
@@ -20,6 +21,7 @@ This commit adds...
 ```
 
 ### ❌ WRONG - Do NOT output:
+
 ```
 I've analyzed the staged changes. Here's the commit message:
 
@@ -27,6 +29,7 @@ feat(parser): add support for device type detection
 ```
 
 ### ✅ CORRECT - Output this exactly:
+
 ````
 ```
 feat(parser): add support for device type detection
@@ -38,6 +41,7 @@ for future features.
 ````
 
 **RULES:**
+
 - NO introductory text like "Here's your commit message:" or "I've analyzed the changes and..."
 - NO explanations before or after the code block
 - Put the ENTIRE commit message inside a single markdown code block (```)
@@ -61,10 +65,12 @@ This shows all staged files with their status (M=modified, A=added, D=deleted, e
 
 ---
 
-## Guidelines 
+## Guidelines
+
 Follow the instructions from the [CONTRIBUTING.md](../../CONTRIBUTING.md) file.
 
 ### Structure
+
 1. **Header**: `<type>(<scope>): <description>` (max 72 chars)
 2. **Body**: (Optional) Detailed explanation of the change.
 3. **Footer**: (Optional) Breaking changes or issue references.
@@ -84,6 +90,7 @@ Your output should be a single code block following this structure:
 ````
 
 **Example output (exactly as it should appear):**
+
 ````
 ```
 feat(protocol): add tilt position control for blinds
@@ -97,18 +104,22 @@ Closes #42
 ````
 
 ### Examples
+
 **Good:**
+
 - feat(parser): add support for nested trace blocks
 - fix(git): handle dirty state detection for untracked files
 - docs: update architecture overview in ENGINE.md
 
 **Bad:**
+
 - update code
 - bugfix
 - changes
 
 ### Tips
+
 - Use the imperative mood in the description ("add", not "added" or "adds").
 - Keep the first line under 72 characters.
-- Use the body to explain *why* if the change is complex.
+- Use the body to explain _why_ if the change is complex.
 - For breaking changes, add `BREAKING CHANGE:` in the footer.

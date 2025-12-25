@@ -1,6 +1,6 @@
 /**
  * @file Simplified Stick Test Suite
- * 
+ *
  * Unit tests for DuoFern USB stick focusing on achieving >95% code coverage.
  * Uses mocked SerialPort to avoid requiring actual hardware.
  */
@@ -20,7 +20,7 @@ class MockSerialPort extends EventEmitter {
         this.options = options;
     }
 
-    open(callback: (err?: Error) => void) {
+    open(callback: (err?: Error) => void): void {
         setTimeout(() => {
             this.isOpen = true;
             this.emit('open');
@@ -28,19 +28,19 @@ class MockSerialPort extends EventEmitter {
         }, 5);
     }
 
-    close(callback: (err?: Error) => void) {
+    close(callback: (err?: Error) => void): void {
         setTimeout(() => {
             this.isOpen = false;
             callback();
         }, 5);
     }
 
-    write(data: Buffer) {
+    write(data: Buffer): void {
         this.writtenData.push(data);
         // No auto-ACK - tests handle this explicitly when needed
     }
 
-    simulateData(hexString: string) {
+    simulateData(hexString: string): void {
         const buffer = Buffer.from(hexString, 'hex');
         this.emit('data', buffer);
     }
@@ -48,28 +48,28 @@ class MockSerialPort extends EventEmitter {
 
 // Mock serialport module
 const originalRequire = (Module.prototype as any).require;
-(Module.prototype as any).require = function (id: string) {
+(Module.prototype as any).require = function (id: string, ...args: any[]): any {
     if (id === 'serialport') {
         return { SerialPort: MockSerialPort };
     }
-    return originalRequire.apply(this, arguments);
+    return originalRequire.apply(this, args);
 };
 
 import { DuoFernStick } from './stick';
 
 // Helper to initialize stick with auto-ACK
-async function initializeStick(stickInstance: DuoFernStick, timeout = 300): Promise<void> {
+async function initializeStick(stickInstance: DuoFernStick, _timeout = 300): Promise<void> {
     const port = (stickInstance as any).port as MockSerialPort;
     const originalWrite = port.write.bind(port);
 
     // Override write to auto-respond with ACKs during init
-    port.write = (data: Buffer) => {
+    port.write = (data: Buffer): void => {
         originalWrite(data);
         setTimeout(() => port.simulateData(Protocol.duoACK), 5);
     };
 
     // Wait for initialization to complete
-    const initPromise = new Promise<void>((resolve) => {
+    const initPromise = new Promise<void>(resolve => {
         stickInstance.once('initialized', () => resolve());
     });
 
@@ -99,7 +99,7 @@ describe('DuoFern Stick', () => {
             if (mockPort.isOpen) {
                 await stick.close();
             }
-        } catch (e) {
+        } catch {
             // Ignore cleanup errors
         }
     });
@@ -107,7 +107,9 @@ describe('DuoFern Stick', () => {
     it('should create instance and initialize', async function () {
         this.timeout(2000);
         let initialized = false;
-        stick.on('initialized', () => { initialized = true; });
+        stick.on('initialized', () => {
+            initialized = true;
+        });
 
         await initializeStick(stick, 300);
 
@@ -115,10 +117,10 @@ describe('DuoFern Stick', () => {
         assert.ok(initialized);
     });
 
-    it('should handle data buffering and frame extraction', (done) => {
-        const frame = '0FFF0F21' + '00'.repeat(18);
+    it('should handle data buffering and frame extraction', done => {
+        const frame = `0FFF0F21${'00'.repeat(18)}`;
 
-        stick.on('frame', (receivedFrame) => {
+        stick.on('frame', receivedFrame => {
             assert.strictEqual(receivedFrame, frame.toUpperCase());
             done();
         });
@@ -126,11 +128,11 @@ describe('DuoFern Stick', () => {
         mockPort.simulateData(frame);
     });
 
-    it('should handle partial frames across multiple data events', (done) => {
-        const frame = '0FFF0F21' + '00'.repeat(18);
+    it('should handle partial frames across multiple data events', done => {
+        const frame = `0FFF0F21${'00'.repeat(18)}`;
         const frames: string[] = [];
 
-        stick.on('frame', (f) => {
+        stick.on('frame', f => {
             frames.push(f);
             if (frames.length === 1) {
                 assert.strictEqual(f, frame.toUpperCase());
@@ -143,7 +145,7 @@ describe('DuoFern Stick', () => {
         mockPort.simulateData(frame.substring(20));
     });
 
-    it('should handle ACK frames', (done) => {
+    it('should handle ACK frames', done => {
         stick.on('log', (level, msg) => {
             if (msg.includes('Received ACK')) {
                 done();
@@ -159,7 +161,10 @@ describe('DuoFern Stick', () => {
 
         // First verify the regex matches
         const matches = Protocol.pairPaired.test(pairFrame);
-        assert.ok(matches, `Regex should match pairFrame. Regex: ${Protocol.pairPaired}, Frame: ${pairFrame}, Length: ${pairFrame.length}`);
+        assert.ok(
+            matches,
+            `Regex should match pairFrame. Regex: ${Protocol.pairPaired}, Frame: ${pairFrame}, Length: ${pairFrame.length}`,
+        );
 
         await initializeStick(stick, 300);
 
@@ -168,7 +173,7 @@ describe('DuoFern Stick', () => {
         assert.ok(stick.isInitialized, 'Stick should be initialized');
 
         let receivedFrame = '';
-        stick.on('paired', (frame) => {
+        stick.on('paired', frame => {
             receivedFrame = frame;
         });
 
@@ -191,7 +196,7 @@ describe('DuoFern Stick', () => {
         assert.ok(stick.isInitialized, 'Stick should be initialized');
 
         let receivedFrame = '';
-        stick.on('unpaired', (frame) => {
+        stick.on('unpaired', frame => {
             receivedFrame = frame;
         });
 
@@ -214,9 +219,7 @@ describe('DuoFern Stick', () => {
 
         await new Promise(resolve => setTimeout(resolve, 50));
 
-        const written = mockPort.writtenData.some(buf =>
-            buf.toString('hex').toUpperCase() === cmd.toUpperCase()
-        );
+        const written = mockPort.writtenData.some(buf => buf.toString('hex').toUpperCase() === cmd.toUpperCase());
         assert.ok(written);
     });
 
@@ -232,8 +235,11 @@ describe('DuoFern Stick', () => {
             setTimeout(() => devPort.simulateData(Protocol.duoACK), 5);
         };
 
-        let initialized = false;
-        stickWithDevices.on('initialized', () => { initialized = true; });
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        let _initialized = false;
+        stickWithDevices.on('initialized', () => {
+            _initialized = true;
+        });
 
         await stickWithDevices.open();
         await new Promise(resolve => setTimeout(resolve, 400));
@@ -277,8 +283,8 @@ describe('DuoFern Stick', () => {
         mockPort.close = originalClose;
     });
 
-    it('should emit serial port errors', (done) => {
-        stick.on('error', (err) => {
+    it('should emit serial port errors', done => {
+        stick.on('error', err => {
             assert.ok(err);
             done();
         });
@@ -332,7 +338,7 @@ describe('DuoFern Stick', () => {
             setTimeout(() => mockPort.simulateData(Protocol.duoACK), 5);
         };
 
-        const reopenPromise = new Promise<void>((resolve) => {
+        const reopenPromise = new Promise<void>(resolve => {
             stick.once('initialized', () => resolve());
         });
 
@@ -360,7 +366,7 @@ describe('DuoFern Stick', () => {
         };
 
         let errorEmitted = false;
-        timeoutStick.on('error', (err) => {
+        timeoutStick.on('error', err => {
             if (err.message.includes('Timeout')) {
                 errorEmitted = true;
             }
@@ -372,7 +378,7 @@ describe('DuoFern Stick', () => {
         assert.ok(errorEmitted);
     });
 
-    it('should emit log events', (done) => {
+    it('should emit log events', done => {
         let logReceived = false;
 
         stick.on('log', (level, message) => {
@@ -384,7 +390,7 @@ describe('DuoFern Stick', () => {
             }
         });
 
-        stick.open();
+        void stick.open();
     });
 
     it('should handle queue timeout when no ACK', async function () {
@@ -453,7 +459,7 @@ describe('DuoFern Stick', () => {
             setTimeout(() => mockPort.simulateData(Protocol.duoACK), 5);
         };
 
-        const reopenPromise = new Promise<void>((resolve) => {
+        const reopenPromise = new Promise<void>(resolve => {
             stick.once('initialized', () => resolve());
         });
 
@@ -497,7 +503,7 @@ describe('DuoFern Stick', () => {
             setTimeout(() => mockPort.simulateData(Protocol.duoACK), 5);
         };
 
-        const reopenPromise = new Promise<void>((resolve) => {
+        const reopenPromise = new Promise<void>(resolve => {
             stick.once('initialized', () => resolve());
         });
 
@@ -525,7 +531,7 @@ describe('DuoFern Stick', () => {
         let errorEmitted = false;
         let emittedError: any = null;
         // Use 'on' instead of 'once' to ensure we don't miss it
-        stick.on('error', (err) => {
+        stick.on('error', err => {
             emittedError = err;
             if (err.message && err.message.includes('Reopen failed')) {
                 errorEmitted = true;
@@ -543,7 +549,10 @@ describe('DuoFern Stick', () => {
             await new Promise(resolve => setTimeout(resolve, 10));
 
             // Verify error event was emitted
-            assert.ok(errorEmitted, `Error event should have been emitted. Got: ${emittedError ? emittedError.message : 'no error'}`);
+            assert.ok(
+                errorEmitted,
+                `Error event should have been emitted. Got: ${emittedError ? emittedError.message : 'no error'}`,
+            );
         }
 
         // Restore

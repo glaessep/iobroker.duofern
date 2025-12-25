@@ -3,26 +3,31 @@
 ## Usage
 
 **To use this prompt:**
+
 1. Make sure you're on the PR branch (the active PR will be automatically detected from the repository context)
 2. Reference this prompt in your message: `@workspace /prompts/review-comment.prompt.md`
 3. Or simply say: "Review all unresolved comments on PR #2" (replacing with your PR number)
 
 **The PR information is automatically available through:**
+
 - Repository context attachment (shows active PR)
 - Current branch name
 - You can also explicitly specify: "Review PR #2" if needed
 
 ## Objective
+
 Review and address all unresolved review comments on the current pull request syste (available in repository context attachment). Filter for unresolved comments only.
 
 Use the repository owner and name from context:
+
 - Owner: Extract from repository context attachment
-- Repo: Extract from repository context attachment  
+- Repo: Extract from repository context attachment
 - PR number: From active PR in repository context, or explicitly provided by userplement the suggested fix or provide a reasoned explanation for not doing so.
 
 ## Critical Rules
 
 ### 🚨 MOST IMPORTANT: How to Reply to Comments
+
 **You MUST reply directly in each review comment thread using the GitHub API:**
 
 ```bash
@@ -36,6 +41,7 @@ curl -X POST \
 **DO NOT use `mcp_github_add_issue_comment` - that posts general PR comments, not thread replies!**
 
 ### Other Rules
+
 1. **Individual Thread Responses**: Post a response directly in each review comment thread - do NOT post a single summary comment
 2. **Never Resolve**: Never mark comments as resolved - only the user can do this
 3. **Read Before Acting**: Carefully read and understand each comment before taking action
@@ -45,10 +51,13 @@ curl -X POST \
 ## Workflow
 
 ### Step 1: Fetch Review Comments
+
 Activate GitHub PR management tools and fetch all review comments for the active PR. Filter for unresolved comments only.
 
 ### Step 2: For EACH Comment - Analyze, Fix (if needed), and Reply
+
 For each comment:
+
 - Read the full comment text carefully
 - Identify the file and line(s) being discussed
 - Understand the concern or suggestion
@@ -56,18 +65,23 @@ For each comment:
 - Check the attached instructions (CONTRIBUTING.md, .github/copilot-instructions.md) for project-specific guidelines
 
 ### Step 3: Make a Decision
+
 Decide whether to:
+
 - **Fix**: The comment identifies a valid issue that should be addressed
 - **Skip**: The comment is informational, already addressed, or not applicable
 - **Discuss**: The comment requires clarification or presents trade-offs
 
 ### Step 4: Take Action
+
 If fixing:
+
 1. Make the necessary code changes
 2. Test that the changes don't break anything (run lint/build if applicable)
 3. Document the fix in the comment thread
 
 If not fixing:
+
 1. Provide a clear, respectful explanation in the comment thread
 2. Reference project standards or technical reasons as appropriate
 
@@ -82,6 +96,7 @@ POST /repos/{owner}/{repo}/pulls/comments/{comment_id}/replies
 ```
 
 **Implementation:**
+
 ```bash
 curl -X POST \
   -H "Authorization: token $(gh auth token)" \
@@ -93,9 +108,11 @@ curl -X POST \
 **Note:** Do NOT use `mcp_github_add_issue_comment` - that posts general PR comments, not replies to specific review threads.
 
 #### 2e. Response Format
+
 Use this format in your curl reply body:
 
 **If fixed:**
+
 ```
 ✅ **Fixed!** [Brief description of what was changed]
 
@@ -103,6 +120,7 @@ Use this format in your curl reply body:
 ```
 
 **If not fixing:**
+
 ```
 💭 **Considered but not fixing:** [Clear explanation]
 
@@ -110,6 +128,7 @@ Use this format in your curl reply body:
 ```
 
 **If needs discussion:**
+
 ```
 🤔 **Needs clarification:** [Question or concern]
 
@@ -128,9 +147,11 @@ Use this format in your curl reply body:
 ## Example Scenario
 
 **Review Comment:**
+
 > Consider adding input validation before calling `.toUpperCase()` to prevent potential errors with null/undefined values.
 
 **Action:**
+
 1. Read the comment and locate the code
 2. Verify the concern is valid (yes, `toUpperCase()` would throw if called on null)
 3. Add validation: `if (!value || value.length !== 6) { return; }`
@@ -145,6 +166,7 @@ Now checking `value.length !== 6` before any string operations, which handles nu
 ## Error Handling
 
 If you encounter issues:
+
 - **Cannot find comment thread**: Verify the PR number and comment ID are correct
 - **Authentication failure**: Check that `gh auth token` works correctly
 - **API rate limits**: Wait and retry, or consolidate responses if possible
@@ -153,6 +175,7 @@ If you encounter issues:
 ## Success Criteria
 
 You've completed this task successfully when:
+
 - [ ] Every unresolved review comment has received a direct response in its thread
 - [ ] All valid issues have been fixed with code changes
 - [ ] All responses are clear, professional, and helpful

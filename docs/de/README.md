@@ -11,7 +11,9 @@ Adapter der Rademacher DuoFern Geräte über DuoFern USB Stick verbindet.
 ## Konfiguration
 
 ### Serielle Schnittstelle
+
 Gib den Pfad zur seriellen Schnittstelle an, an der dein DuoFern USB-Stick angeschlossen ist:
+
 - Linux: `/dev/ttyUSB0` oder `/dev/serial/by-id/...`
 - Windows: `COM1`, `COM2`, etc.
 
@@ -20,14 +22,16 @@ Gib den Pfad zur seriellen Schnittstelle an, an der dein DuoFern USB-Stick anges
 **Tipp**: Unter Linux wird dringend empfohlen, den Pfad unter `/dev/serial/by-id/` anstelle von `/dev/ttyUSB0` zu verwenden, da dieser persistent und über Neustarts hinweg stabiler ist. Verwende `ls -l /dev/serial/by-id/`, um den korrekten Pfad zu finden.
 
 ### DuoFern Stick Code
+
 Gib den 6-stelligen Hexadezimalcode deines DuoFern Sticks ein:
+
 - Muss mit `6F` beginnen
 - Die letzten 4 Ziffern sind frei konfigurierbar (z.B. `6F1234`)
 
 ## Unterstützte Geräte
 
 - **Rollläden/Markisen**: Grundsteuerung (hoch, runter, stopp, Position, andere Befehle funktionieren möglicherweise, sind aber ungetestet)
-  - *Hinweis: Dieser Adapter wurde bisher nur mit Rollläden/Jalousien getestet.*
+    - _Hinweis: Dieser Adapter wurde bisher nur mit Rollläden/Jalousien getestet._
 
 ## Verwendung
 
@@ -39,11 +43,13 @@ Gib den 6-stelligen Hexadezimalcode deines DuoFern Sticks ein:
 ## Fehlerbehebung
 
 ### Gerät nicht gefunden
+
 - Überprüfe Pfad und Berechtigungen der seriellen Schnittstelle
 - Stelle sicher, dass der Stick-Code korrekt ist
 - Vergewissere dich, dass der USB-Stick richtig angeschlossen ist
 
 ### Gerät reagiert nicht
+
 - Prüfe, ob sich das Gerät in Funkreichweite befindet
 - Überprüfe, ob das Gerät ordnungsgemäß gekoppelt ist
 - Überprüfe die Adapter-Logs auf Fehlermeldungen
