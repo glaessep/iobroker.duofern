@@ -1,87 +1,87 @@
 {
-    "name": "iobroker.duofern",
-    "version": "0.6.4",
-    "description": "Connect Rademacher DuoFern devices via DuoFern USB Stick",
-    "author": {
-        "name": "Patrick Gläßer",
-        "email": "p.glaesser@hotmail.de"
-    },
-    "contributors": [
-        {
-            "name": "Patrick Gläßer"
-        }
-    ],
-    "homepage": "https://github.com/glaessep/ioBroker.duofern",
-    "license": "MIT",
-    "keywords": [
-        "rademacher",
-        "duofern",
-        "ioBroker"
-    ],
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/glaessep/ioBroker.duofern.git"
-    },
-    "engines": {
-        "node": ">= 20"
-    },
-    "dependencies": {
-        "@iobroker/adapter-core": "^3.3.2",
-        "serialport": "^13.0.0"
-    },
-    "devDependencies": {
-        "@alcalzone/release-script": "^5.0.0",
-        "@alcalzone/release-script-plugin-iobroker": "^4.0.0",
-        "@alcalzone/release-script-plugin-license": "^4.0.0",
-        "@alcalzone/release-script-plugin-manual-review": "^4.0.0",
-        "@iobroker/adapter-dev": "^1.5.0",
-        "@iobroker/dev-server": "^0.8.0",
-        "@iobroker/eslint-config": "^2.2.0",
-        "@iobroker/testing": "^5.2.2",
-        "@istanbuljs/nyc-config-typescript": "^1.0.2",
-        "@tsconfig/node20": "^20.1.8",
-        "@iobroker/types": "^7.1.0",
-        "@types/node": "^20.19.27",
-        "@types/proxyquire": "^1.3.31",
-        "nyc": "^17.1.0",
-        "prettier": "^3.7.4",
-        "proxyquire": "^2.1.3",
-        "rimraf": "^6.1.2",
-        "source-map-support": "^0.5.21",
-        "ts-node": "^10.9.2",
-        "tsx": "^4.21.0",
-        "typescript": "~5.9.3"
-    },
-    "main": "build/main.js",
-    "files": [
-        "admin{,/!(src)/**}/!(tsconfig|tsconfig.*|.eslintrc).{json,json5}",
-        "admin{,/!(src)/**}/*.{html,css,png,svg,jpg,js}",
-        "build/",
-        "www/",
-        "io-package.json",
-        "LICENSE"
-    ],
-    "scripts": {
-        "prebuild": "rimraf build",
-        "build": "build-adapter ts",
-        "watch": "build-adapter ts --watch",
-        "prebuild:ts": "rimraf build",
-        "build:ts": "build-adapter ts",
-        "watch:ts": "build-adapter ts --watch",
-        "test:ts": "mocha src/**/*.test.ts",
-        "test:package": "mocha --config test/.mocharc.yml test/package.test.ts",
-        "test:integration": "mocha --config test/.mocharc.yml test/integration.test.ts",
-        "test": "npm run test:ts && npm run test:package",
-        "check": "tsc --noEmit",
-        "coverage": "nyc npm run test:ts",
-        "lint": "eslint -c eslint.config.mjs .",
-        "format": "prettier --write .",
-        "translate": "translate-adapter",
-        "release": "release-script",
-        "dev-server": "dev-server"
-    },
-    "bugs": {
-        "url": "https://github.com/glaessep/ioBroker.duofern/issues"
-    },
-    "readmeFilename": "README.md"
+  "name": "iobroker.duofern",
+  "version": "0.7.0",
+  "description": "Connect Rademacher DuoFern devices via DuoFern USB Stick",
+  "author": {
+    "name": "Patrick Gläßer",
+    "email": "p.glaesser@hotmail.de"
+  },
+  "contributors": [
+    {
+      "name": "Patrick Gläßer"
+    }
+  ],
+  "homepage": "https://github.com/glaessep/ioBroker.duofern",
+  "license": "MIT",
+  "keywords": [
+    "rademacher",
+    "duofern",
+    "ioBroker"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/glaessep/ioBroker.duofern.git"
+  },
+  "engines": {
+    "node": ">= 20"
+  },
+  "dependencies": {
+    "@iobroker/adapter-core": "^3.3.2",
+    "serialport": "^13.0.0"
+  },
+  "devDependencies": {
+    "@alcalzone/release-script": "^5.0.0",
+    "@alcalzone/release-script-plugin-iobroker": "^4.0.0",
+    "@alcalzone/release-script-plugin-license": "^4.0.0",
+    "@alcalzone/release-script-plugin-manual-review": "^4.0.0",
+    "@iobroker/adapter-dev": "^1.5.0",
+    "@iobroker/dev-server": "^0.8.0",
+    "@iobroker/eslint-config": "^2.2.0",
+    "@iobroker/testing": "^5.2.2",
+    "@istanbuljs/nyc-config-typescript": "^1.0.2",
+    "@tsconfig/node20": "^20.1.8",
+    "@iobroker/types": "^7.1.0",
+    "@types/node": "^20.19.27",
+    "@types/proxyquire": "^1.3.31",
+    "nyc": "^17.1.0",
+    "prettier": "^3.7.4",
+    "proxyquire": "^2.1.3",
+    "rimraf": "^6.1.2",
+    "source-map-support": "^0.5.21",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.21.0",
+    "typescript": "~5.9.3"
+  },
+  "main": "build/main.js",
+  "files": [
+    "admin{,/!(src)/**}/!(tsconfig|tsconfig.*|.eslintrc).{json,json5}",
+    "admin{,/!(src)/**}/*.{html,css,png,svg,jpg,js}",
+    "build/",
+    "www/",
+    "io-package.json",
+    "LICENSE"
+  ],
+  "scripts": {
+    "prebuild": "rimraf build",
+    "build": "build-adapter ts",
+    "watch": "build-adapter ts --watch",
+    "prebuild:ts": "rimraf build",
+    "build:ts": "build-adapter ts",
+    "watch:ts": "build-adapter ts --watch",
+    "test:ts": "mocha src/**/*.test.ts",
+    "test:package": "mocha --config test/.mocharc.yml test/package.test.ts",
+    "test:integration": "mocha --config test/.mocharc.yml test/integration.test.ts",
+    "test": "npm run test:ts && npm run test:package",
+    "check": "tsc --noEmit",
+    "coverage": "nyc npm run test:ts",
+    "lint": "eslint -c eslint.config.mjs .",
+    "format": "prettier --write .",
+    "translate": "translate-adapter",
+    "release": "release-script",
+    "dev-server": "dev-server"
+  },
+  "bugs": {
+    "url": "https://github.com/glaessep/ioBroker.duofern/issues"
+  },
+  "readmeFilename": "README.md"
 }

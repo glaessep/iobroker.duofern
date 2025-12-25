@@ -153,8 +153,7 @@ Additional command line options for the release script are explained in the
 [release-script documentation](https://github.com/AlCalzone/release-script#command-line).
 
 ## Changelog
-
-### **WORK IN PROGRESS**
+### 0.7.0 (2025-12-25)
 
 - (glaessep) Migrated to ioBroker adapter creator v3 structure
 - (glaessep) Improved testability with SerialPort dependency injection
