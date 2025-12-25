@@ -122,7 +122,7 @@
             "zh-cn": "通过 DuoFern USB 棒连接 Rademacher DuoFern 设备"
         },
         "authors": ["Patrick Gläßer"],
-        "keywords": ["rademacher", "duofern", "ioBroker"],
+        "keywords": ["rademacher", "duofern"],
         "licenseInformation": {
             "type": "free",
             "license": "MIT"
