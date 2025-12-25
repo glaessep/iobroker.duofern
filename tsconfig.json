@@ -34,6 +34,11 @@
         "sourceMap": true,
         "inlineSourceMap": false
     },
+    "ts-node": {
+        "compilerOptions": {
+            "module": "commonjs"
+        }
+    },
     "include": ["src/**/*.ts", "test/**/*.ts"],
     "exclude": ["build/**", "node_modules/**", "widgets/**"]
 }

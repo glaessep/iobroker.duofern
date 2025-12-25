@@ -15,6 +15,39 @@ import { SerialPort } from 'serialport';
 import { Protocol, buildRemotePair, buildSetDongle, buildSetPairs } from './protocol';
 
 /**
+ * SerialPort-like interface for dependency injection
+ */
+export interface SerialPortLike extends EventEmitter {
+    /**
+     * Whether the port is currently open
+     */
+    isOpen: boolean;
+    /**
+     * Opens the connection to the serial port
+     *
+     * @param callback Called when the port is opened or if an error occurs
+     */
+    open(callback: (err?: Error) => void): void;
+    /**
+     * Closes the connection to the serial port
+     *
+     * @param callback Called when the port is closed or if an error occurs
+     */
+    close(callback?: (err?: Error) => void): void;
+    /**
+     * Writes data to the serial port
+     *
+     * @param data The data to write
+     */
+    write(data: Buffer): void;
+}
+
+/**
+ * SerialPort constructor type
+ */
+export type SerialPortConstructor = new (options: any) => SerialPortLike;
+
+/**
  * DuoFern USB stick communication handler.
  *
  * Extends EventEmitter to provide event-based notifications for:
@@ -29,7 +62,7 @@ import { Protocol, buildRemotePair, buildSetDongle, buildSetPairs } from './prot
  *
  */
 export class DuoFernStick extends EventEmitter {
-    private port: SerialPort;
+    private port: SerialPortLike;
     private buffer: string = '';
     private queue: string[] = [];
     private isProcessingQueue: boolean = false;
@@ -46,12 +79,18 @@ export class DuoFernStick extends EventEmitter {
      * @param path - Serial port path (e.g., '/dev/ttyUSB0' or 'COM3')
      * @param dongleSerial - 6-character hex serial number of the stick (starts with 6F)
      * @param [knownDevices] - Array of 6-character hex device codes to register during init
+     * @param [SerialPortClass] - SerialPort constructor for dependency injection (defaults to real SerialPort)
      */
-    constructor(path: string, dongleSerial: string, knownDevices: string[] = []) {
+    constructor(
+        path: string,
+        dongleSerial: string,
+        knownDevices: string[] = [],
+        SerialPortClass: SerialPortConstructor = SerialPort as any,
+    ) {
         super();
         this.dongleSerial = dongleSerial;
         this.knownDevices = knownDevices;
-        this.port = new SerialPort({ path, baudRate: 115200, autoOpen: false });
+        this.port = new SerialPortClass({ path, baudRate: 115200, autoOpen: false });
 
         this.port.on('data', (data: Buffer) => this.handleData(data));
         this.port.on('open', () => this.onOpen());

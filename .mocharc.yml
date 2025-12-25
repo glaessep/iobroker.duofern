@@ -1,20 +1,16 @@
 # Mocha Test Configuration
 
-# Test files pattern
-spec: 'test/**/*.test.ts'
-
-# Require ts-node for TypeScript support with transpile-only for speed
-require:
-    - 'ts-node/register/transpile-only'
-
-# Use ts-node loader for TypeScript support and suppress deprecation warnings
+# Use tsx for TypeScript support (handles both TS and JS)
 node-option:
-    - 'loader=ts-node/esm'
-    - 'no-warnings'
+    - 'import=tsx'
 
-# Test environment
-ui: 'bdd'
-reporter: 'spec'
+# Test files pattern - only src/ unit tests by default
+spec:
+    - 'src/**/*.test.ts'
+
+# Watch files for changes
+watch-files:
+    - 'src/**/*.ts'
 
 # Timeout settings
 timeout: 5000

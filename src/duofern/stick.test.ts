@@ -2,13 +2,13 @@
  * @file Simplified Stick Test Suite
  *
  * Unit tests for DuoFern USB stick focusing on achieving >95% code coverage.
- * Uses mocked SerialPort to avoid requiring actual hardware.
+ * Uses dependency injection to mock SerialPort without requiring actual hardware.
  */
 
 import * as assert from 'assert';
 import { EventEmitter } from 'events';
-import * as Module from 'module';
 import { Protocol } from './protocol';
+import { DuoFernStick } from './stick';
 
 class MockSerialPort extends EventEmitter {
     public isOpen: boolean = false;
@@ -28,10 +28,12 @@ class MockSerialPort extends EventEmitter {
         }, 5);
     }
 
-    close(callback: (err?: Error) => void): void {
+    close(callback?: (err?: Error) => void): void {
         setTimeout(() => {
             this.isOpen = false;
-            callback();
+            if (callback) {
+                callback();
+            }
         }, 5);
     }
 
@@ -46,26 +48,14 @@ class MockSerialPort extends EventEmitter {
     }
 }
 
-// Mock serialport module
-const originalRequire = (Module.prototype as any).require;
-(Module.prototype as any).require = function (id: string, ...args: any[]): any {
-    if (id === 'serialport') {
-        return { SerialPort: MockSerialPort };
-    }
-    return originalRequire.apply(this, args);
-};
-
-import { DuoFernStick } from './stick';
-
 // Helper to initialize stick with auto-ACK
-async function initializeStick(stickInstance: DuoFernStick, _timeout = 300): Promise<void> {
-    const port = (stickInstance as any).port as MockSerialPort;
-    const originalWrite = port.write.bind(port);
+async function initializeStick(stickInstance: DuoFernStick, mockPort: MockSerialPort, _timeout = 300): Promise<void> {
+    const originalWrite = mockPort.write.bind(mockPort);
 
     // Override write to auto-respond with ACKs during init
-    port.write = (data: Buffer): void => {
+    mockPort.write = (data: Buffer): void => {
         originalWrite(data);
-        setTimeout(() => port.simulateData(Protocol.duoACK), 5);
+        setTimeout(() => mockPort.simulateData(Protocol.duoACK), 5);
     };
 
     // Wait for initialization to complete
@@ -78,7 +68,7 @@ async function initializeStick(stickInstance: DuoFernStick, _timeout = 300): Pro
     await new Promise(resolve => setTimeout(resolve, 50)); // Small delay for processing
 
     // Restore original write behavior after init completes
-    port.write = originalWrite;
+    mockPort.write = originalWrite;
 }
 
 describe('DuoFern Stick', () => {
@@ -86,7 +76,8 @@ describe('DuoFern Stick', () => {
     let mockPort: MockSerialPort;
 
     beforeEach(() => {
-        stick = new DuoFernStick('/dev/ttyUSB0', '6F1234', []);
+        // Create stick with mocked SerialPort using dependency injection
+        stick = new DuoFernStick('/dev/ttyUSB0', '6F1234', [], MockSerialPort as any);
         mockPort = (stick as any).port as MockSerialPort;
         // Add a default error handler to prevent uncaught errors
         stick.on('error', () => {
@@ -111,7 +102,7 @@ describe('DuoFern Stick', () => {
             initialized = true;
         });
 
-        await initializeStick(stick, 300);
+        await initializeStick(stick, mockPort, 300);
 
         assert.strictEqual(stick.isInitialized, true);
         assert.ok(initialized);
@@ -166,7 +157,7 @@ describe('DuoFern Stick', () => {
             `Regex should match pairFrame. Regex: ${Protocol.pairPaired}, Frame: ${pairFrame}, Length: ${pairFrame.length}`,
         );
 
-        await initializeStick(stick, 300);
+        await initializeStick(stick, mockPort, 300);
 
         // Verify port is open
         assert.ok(mockPort.isOpen, 'Port should be open after init');
@@ -189,7 +180,7 @@ describe('DuoFern Stick', () => {
         this.timeout(2000);
         const unpairFrame = '0603016F1234000000000000000000FFFFFF00000000';
 
-        await initializeStick(stick, 300);
+        await initializeStick(stick, mockPort, 300);
 
         // Verify port is open
         assert.ok(mockPort.isOpen, 'Port should be open after init');
@@ -212,7 +203,7 @@ describe('DuoFern Stick', () => {
         this.timeout(2000);
         const cmd = '0D000007020000000000006F1234ABCDEF00';
 
-        await initializeStick(stick, 300);
+        await initializeStick(stick, mockPort, 300);
 
         mockPort.writtenData = [];
         stick.write(cmd);
@@ -225,7 +216,12 @@ describe('DuoFern Stick', () => {
 
     it('should handle initialization with known devices', async function () {
         this.timeout(2000);
-        const stickWithDevices = new DuoFernStick('/dev/ttyUSB1', '6F9999', ['AABBCC', 'DDEEFF']);
+        const stickWithDevices = new DuoFernStick(
+            '/dev/ttyUSB1',
+            '6F9999',
+            ['AABBCC', 'DDEEFF'],
+            MockSerialPort as any,
+        );
         const devPort = (stickWithDevices as any).port as MockSerialPort;
 
         // Setup auto-ACK
@@ -249,7 +245,7 @@ describe('DuoFern Stick', () => {
     });
 
     it('should handle port open error', async () => {
-        const badStick = new DuoFernStick('/dev/invalid', '6F0000', []);
+        const badStick = new DuoFernStick('/dev/invalid', '6F0000', [], MockSerialPort as any);
         const badPort = (badStick as any).port as MockSerialPort;
 
         badPort.open = (callback: (err?: Error) => void) => {
@@ -266,7 +262,7 @@ describe('DuoFern Stick', () => {
 
     it('should handle port close error', async function () {
         this.timeout(2000);
-        await initializeStick(stick, 300);
+        await initializeStick(stick, mockPort, 300);
 
         const originalClose = mockPort.close.bind(mockPort);
         mockPort.close = (callback: (err?: Error) => void) => {
@@ -294,7 +290,7 @@ describe('DuoFern Stick', () => {
 
     it('should call pair() and queue command', async function () {
         this.timeout(2000);
-        await initializeStick(stick, 300);
+        await initializeStick(stick, mockPort, 300);
 
         mockPort.writtenData = [];
         stick.pair();
@@ -305,7 +301,7 @@ describe('DuoFern Stick', () => {
 
     it('should call unpair() and queue command', async function () {
         this.timeout(2000);
-        await initializeStick(stick, 300);
+        await initializeStick(stick, mockPort, 300);
 
         mockPort.writtenData = [];
         stick.unpair();
@@ -316,7 +312,7 @@ describe('DuoFern Stick', () => {
 
     it('should call remotePair() and queue command', async function () {
         this.timeout(2000);
-        await initializeStick(stick, 300);
+        await initializeStick(stick, mockPort, 300);
 
         mockPort.writtenData = [];
         stick.remotePair('ABCDEF');
@@ -327,7 +323,7 @@ describe('DuoFern Stick', () => {
 
     it('should handle reopen()', async function () {
         this.timeout(2000);
-        await initializeStick(stick, 300);
+        await initializeStick(stick, mockPort, 300);
 
         assert.strictEqual(stick.isInitialized, true);
 
@@ -356,7 +352,7 @@ describe('DuoFern Stick', () => {
 
     it('should handle init timeout', async function () {
         this.timeout(5000);
-        const timeoutStick = new DuoFernStick('/dev/ttyUSB2', '6F0000', []);
+        const timeoutStick = new DuoFernStick('/dev/ttyUSB2', '6F0000', [], MockSerialPort as any);
         const timeoutPort = (timeoutStick as any).port as MockSerialPort;
 
         // Don't auto-respond to cause timeout
@@ -395,7 +391,7 @@ describe('DuoFern Stick', () => {
 
     it('should handle queue timeout when no ACK', async function () {
         this.timeout(7000);
-        await initializeStick(stick, 300);
+        await initializeStick(stick, mockPort, 300);
 
         // Override to not send ACK
         mockPort.write = (data: Buffer) => {
@@ -418,7 +414,7 @@ describe('DuoFern Stick', () => {
 
     it('should clear queueTimeout when ACK received', async function () {
         this.timeout(3000);
-        await initializeStick(stick, 300);
+        await initializeStick(stick, mockPort, 300);
 
         // Setup to NOT automatically send ACK, but track the write
         mockPort.writtenData = [];
@@ -448,7 +444,7 @@ describe('DuoFern Stick', () => {
 
     it('should handle reopen() with updated device list', async function () {
         this.timeout(2000);
-        await initializeStick(stick, 300);
+        await initializeStick(stick, mockPort, 300);
 
         assert.strictEqual(stick.isInitialized, true);
 
@@ -477,7 +473,7 @@ describe('DuoFern Stick', () => {
 
     it('should handle reopen() with queued commands', async function () {
         this.timeout(2000);
-        await initializeStick(stick, 300);
+        await initializeStick(stick, mockPort, 300);
 
         assert.strictEqual(stick.isInitialized, true);
 
@@ -518,7 +514,7 @@ describe('DuoFern Stick', () => {
 
     it('should handle reopen() failure and emit error', async function () {
         this.timeout(2000);
-        await initializeStick(stick, 300);
+        await initializeStick(stick, mockPort, 300);
 
         assert.strictEqual(stick.isInitialized, true);
 

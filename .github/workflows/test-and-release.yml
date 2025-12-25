@@ -20,10 +20,6 @@ concurrency:
 
 env:
     COVERAGE_DIR: coverage
-    COVERAGE_TEMP_DIR: .nyc_output
-    COVERAGE_STATEMENTS: 95
-    COVERAGE_BRANCHES: 85
-    COVERAGE_FUNCTIONS: 100
 
 jobs:
     # Performs quick checks before the expensive test runs
@@ -50,12 +46,19 @@ jobs:
               if: always()
               run: |
                   COVERAGE_SUMMARY="${{ env.COVERAGE_DIR }}/coverage-summary.json"
+                  NYC_CONFIG=".nycrc"
 
                   if [ ! -f "$COVERAGE_SUMMARY" ]; then
                     echo "❌ Coverage summary file not found"
                     exit 1
                   fi
 
+                  # Extract thresholds from .nycrc
+                  REQUIRED_STATEMENTS=$(jq -r '.statements' "$NYC_CONFIG")
+                  REQUIRED_BRANCHES=$(jq -r '.branches' "$NYC_CONFIG")
+                  REQUIRED_FUNCTIONS=$(jq -r '.functions' "$NYC_CONFIG")
+
+                  # Extract actual coverage from results
                   ACTUAL_STATEMENTS=$(jq -r '.total.statements.pct' "$COVERAGE_SUMMARY")
                   ACTUAL_BRANCHES=$(jq -r '.total.branches.pct' "$COVERAGE_SUMMARY")
                   ACTUAL_FUNCTIONS=$(jq -r '.total.functions.pct' "$COVERAGE_SUMMARY")
@@ -64,16 +67,16 @@ jobs:
                     echo "✅ Coverage checks passed!"
                     echo ""
                     echo "Coverage achieved:"
-                    echo "  • Statements: $ACTUAL_STATEMENTS% (required: ${{ env.COVERAGE_STATEMENTS }}%) ✓"
-                    echo "  • Branches: $ACTUAL_BRANCHES% (required: ${{ env.COVERAGE_BRANCHES }}%) ✓"
-                    echo "  • Functions: $ACTUAL_FUNCTIONS% (required: ${{ env.COVERAGE_FUNCTIONS }}%) ✓"
+                    echo "  • Statements: $ACTUAL_STATEMENTS% (required: $REQUIRED_STATEMENTS%) ✓"
+                    echo "  • Branches: $ACTUAL_BRANCHES% (required: $REQUIRED_BRANCHES%) ✓"
+                    echo "  • Functions: $ACTUAL_FUNCTIONS% (required: $REQUIRED_FUNCTIONS%) ✓"
                   else
                     echo "❌ Coverage checks failed!"
                     echo ""
                     echo "Coverage achieved vs required:"
-                    echo "  • Statements: $ACTUAL_STATEMENTS% (required: ${{ env.COVERAGE_STATEMENTS }}%)"
-                    echo "  • Branches: $ACTUAL_BRANCHES% (required: ${{ env.COVERAGE_BRANCHES }}%)"
-                    echo "  • Functions: $ACTUAL_FUNCTIONS% (required: ${{ env.COVERAGE_FUNCTIONS }}%)"
+                    echo "  • Statements: $ACTUAL_STATEMENTS% (required: $REQUIRED_STATEMENTS%)"
+                    echo "  • Branches: $ACTUAL_BRANCHES% (required: $REQUIRED_BRANCHES%)"
+                    echo "  • Functions: $ACTUAL_FUNCTIONS% (required: $REQUIRED_FUNCTIONS%)"
                     echo ""
                     echo "💡 To fix missing coverage locally, run:"
                     echo "   npm run coverage"

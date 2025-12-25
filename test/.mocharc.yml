@@ -1,0 +1,17 @@
+# Mocha Test Configuration for test/ folder
+
+# Use tsx for TypeScript support
+node-option:
+    - 'import=tsx'
+
+# Timeout settings (integration tests may take longer)
+timeout: 60000
+
+# Exit after tests complete
+exit: true
+
+# Use colors in output
+color: true
+
+# Include source maps
+full-trace: true
