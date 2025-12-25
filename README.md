@@ -154,10 +154,7 @@ Additional command line options for the release script are explained in the
 
 ## Changelog
 
-<!--
-    Placeholder for the next version (at the beginning of the line):
-    ### **WORK IN PROGRESS**
--->
+### **WORK IN PROGRESS**
 
 ### 0.6.4 (2024-12-25)
 
