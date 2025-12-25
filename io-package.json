@@ -5,43 +5,129 @@
         "news": {
             "0.6.4": {
                 "en": "Added GitHub workflow for automated testing and coverage checks, improved parameter visualization in adapter settings, enhanced documentation, refactored state command definitions to protocol layer, and fixed remotePair command",
-                "de": "GitHub-Workflow für automatisierte Tests und Coverage-Prüfungen hinzugefügt, verbesserte Parametervisualisierung in Adaptereinstellungen, erweiterte Dokumentation, Zustandsbefehldefinitionen zur Protokollschicht refaktoriert und remotePair-Befehl korrigiert"
+                "de": "GitHub-Workflow für automatisierte Tests und Coverage-Prüfungen hinzugefügt, verbesserte Parametervisualisierung in Adaptereinstellungen, erweiterte Dokumentation, Zustandsbefehldefinitionen zur Protokollschicht refaktoriert und remotePair-Befehl korrigiert",
+                "ru": "Добавлен рабочий процесс GitHub для автоматического тестирования и проверки покрытия, улучшенная визуализация параметров в настройках адаптера, расширенная документация, переработаны определения команд состояния на уровне протокола и исправлена ​​команда RemotePair.",
+                "pt": "Adicionado fluxo de trabalho do GitHub para testes automatizados e verificações de cobertura, visualização aprimorada de parâmetros nas configurações do adaptador, documentação aprimorada, definições de comando de estado refatoradas para a camada de protocolo e comando remotePair corrigido",
+                "nl": "GitHub-workflow toegevoegd voor geautomatiseerd testen en dekkingscontroles, verbeterde parametervisualisatie in adapterinstellingen, verbeterde documentatie, refactored state command-definities naar protocollaag en vaste remotePair-opdracht",
+                "fr": "Ajout du flux de travail GitHub pour les tests automatisés et les vérifications de couverture, visualisation améliorée des paramètres dans les paramètres de l'adaptateur, documentation améliorée, définitions de commandes d'état refactorisées dans la couche de protocole et commande RemotePair corrigée.",
+                "it": "Aggiunto flusso di lavoro GitHub per test automatizzati e controlli di copertura, migliore visualizzazione dei parametri nelle impostazioni dell'adattatore, documentazione migliorata, definizioni dei comandi di stato rifattorizzate al livello del protocollo e comando remotePair corretto",
+                "es": "Se agregó flujo de trabajo de GitHub para pruebas automatizadas y verificaciones de cobertura, visualización de parámetros mejorada en la configuración del adaptador, documentación mejorada, definiciones de comandos de estado refactorizadas para la capa de protocolo y comando remotoPair fijo.",
+                "pl": "Dodano przepływ pracy w serwisie GitHub do automatycznego testowania i sprawdzania zasięgu, ulepszoną wizualizację parametrów w ustawieniach adaptera, ulepszoną dokumentację, przekształcono definicje poleceń stanu do warstwy protokołu i naprawiono polecenie RemotePair",
+                "uk": "Додано робочий процес GitHub для автоматизованого тестування та перевірки покриття, покращено візуалізацію параметрів у налаштуваннях адаптера, покращено документацію, перетворено визначення команд стану на рівень протоколу та виправлено команду remotePair",
+                "zh-cn": "添加了用于自动化测试和覆盖率检查的 GitHub 工作流程，改进了适配器设置中的参数可视化，增强了文档，将状态命令定义重构到协议层，并修复了 RemotePair 命令"
             },
             "0.5.5": {
                 "en": "Comprehensive testing coverage with NYC configuration, improved device registration reliability, and enhanced validation for serial port and DuoFern stick code",
-                "de": "Umfassende Testabdeckung mit NYC-Konfiguration, verbesserte Zuverlässigkeit der Geräteregistrierung und erweiterte Validierung für serielle Schnittstelle und DuoFern-Stick-Code"
+                "de": "Umfassende Testabdeckung mit NYC-Konfiguration, verbesserte Zuverlässigkeit der Geräteregistrierung und erweiterte Validierung für serielle Schnittstelle und DuoFern-Stick-Code",
+                "ru": "Комплексное тестирование с конфигурацией для Нью-Йорка, повышенная надежность регистрации устройств и расширенная проверка последовательного порта и кода DuoFern Stick.",
+                "pt": "Cobertura abrangente de testes com configuração NYC, confiabilidade aprimorada de registro de dispositivos e validação aprimorada para porta serial e código stick DuoFern",
+                "nl": "Uitgebreide testdekking met NYC-configuratie, verbeterde betrouwbaarheid van apparaatregistratie en verbeterde validatie voor seriële poort en DuoFern-stickcode",
+                "fr": "Couverture complète des tests avec la configuration NYC, fiabilité améliorée de l'enregistrement des appareils et validation améliorée du port série et du code stick DuoFern",
+                "it": "Copertura completa dei test con configurazione di New York, migliore affidabilità di registrazione del dispositivo e convalida avanzata per la porta seriale e il codice stick DuoFern",
+                "es": "Cobertura de prueba integral con configuración NYC, confiabilidad mejorada del registro del dispositivo y validación mejorada para el puerto serie y el código Stick DuoFern.",
+                "pl": "Kompleksowy zakres testów w konfiguracji NYC, poprawiona niezawodność rejestracji urządzeń i ulepszona weryfikacja portu szeregowego i kodu modułu DuoFern",
+                "uk": "Всебічне тестування з конфігурацією NYC, покращеною надійністю реєстрації пристрою та покращеною перевіркою послідовного порту та коду DuoFern.",
+                "zh-cn": "NYC 配置的全面测试覆盖范围、改进的设备注册可靠性以及增强的串行端口和 DuoFern 棒代码验证"
             },
             "0.4.0": {
                 "en": "Device capability definitions moved to dedicated module, improved device categorization, and device-type-specific state filtering",
-                "de": "Gerätefähigkeitsdefinitionen in dediziertes Modul verschoben, verbesserte Gerätekategorisierung und gerätespezifische Statusfilterung"
+                "de": "Gerätefähigkeitsdefinitionen in dediziertes Modul verschoben, verbesserte Gerätekategorisierung und gerätespezifische Statusfilterung",
+                "ru": "Определения возможностей устройства перенесены в специальный модуль, улучшена категоризация устройств и фильтрация состояний по типам устройств.",
+                "pt": "As definições de capacidade do dispositivo foram movidas para um módulo dedicado, categorização aprimorada de dispositivos e filtragem de estado específica do tipo de dispositivo",
+                "nl": "Definities van apparaatmogelijkheden zijn verplaatst naar een speciale module, verbeterde apparaatcategorisatie en apparaattype-specifieke statusfiltering",
+                "fr": "Les définitions des capacités des appareils ont été déplacées vers un module dédié, une catégorisation améliorée des appareils et un filtrage d'état spécifique au type d'appareil.",
+                "it": "Le definizioni delle funzionalità dei dispositivi sono state spostate in un modulo dedicato, una migliore categorizzazione dei dispositivi e un filtraggio dello stato specifico per il tipo di dispositivo",
+                "es": "Las definiciones de capacidades de los dispositivos se trasladaron a un módulo dedicado, se mejoró la categorización de los dispositivos y el filtrado de estado específico del tipo de dispositivo.",
+                "pl": "Definicje możliwości urządzeń zostały przeniesione do dedykowanego modułu, ulepszona kategoryzacja urządzeń i filtrowanie stanu specyficzne dla typu urządzenia",
+                "uk": "Визначення можливостей пристрою переміщено до спеціального модуля, покращено категоризацію пристроїв і фільтрацію стану залежно від типу пристрою",
+                "zh-cn": "设备功能定义移至专用模块，改进了设备分类和设备类型特定的状态过滤"
             },
             "0.3.4": {
                 "en": "Fixed device name preservation, added status broadcast functionality, implemented button state reset with timers, improved validator regex, and added reopen command",
-                "de": "Gerätename-Erhaltung korrigiert, Status-Broadcast-Funktionalität hinzugefügt, Button-Status-Reset mit Timern implementiert, Validator-Regex verbessert und Reopen-Befehl hinzugefügt"
+                "de": "Gerätename-Erhaltung korrigiert, Status-Broadcast-Funktionalität hinzugefügt, Button-Status-Reset mit Timern implementiert, Validator-Regex verbessert und Reopen-Befehl hinzugefügt",
+                "ru": "Исправлено сохранение имени устройства, добавлена ​​функция трансляции статуса, реализован сброс состояния кнопок с помощью таймеров, улучшено регулярное выражение валидатора и добавлена ​​команда повторного открытия.",
+                "pt": "Preservação de nome de dispositivo corrigida, funcionalidade de transmissão de status adicionada, redefinição de estado de botão implementada com temporizadores, regex de validador aprimorado e comando de reabertura adicionado",
+                "nl": "Behoud van apparaatnaam opgelost, functionaliteit voor statusuitzending toegevoegd, reset van knopstatus met timers geïmplementeerd, verbeterde validator-regex en toegevoegd commando voor heropenen",
+                "fr": "Correction de la préservation du nom de l'appareil, ajout d'une fonctionnalité de diffusion d'état, implémentation de la réinitialisation de l'état des boutons avec minuteries, amélioration de l'expression régulière du validateur et ajout de la commande de réouverture",
+                "it": "Risolto il problema con la conservazione del nome del dispositivo, aggiunta funzionalità di trasmissione dello stato, implementazione del ripristino dello stato dei pulsanti con timer, migliore regex del validatore e aggiunto comando di riapertura",
+                "es": "Se corrigió la preservación del nombre del dispositivo, se agregó funcionalidad de transmisión de estado, se implementó el restablecimiento del estado del botón con temporizadores, se mejoró la expresión regular del validador y se agregó el comando de reapertura.",
+                "pl": "Naprawiono zachowanie nazwy urządzenia, dodano funkcję rozgłaszania statusu, zaimplementowano resetowanie stanu przycisku za pomocą liczników czasu, ulepszone wyrażenie regularne walidatora i dodano polecenie ponownego otwarcia",
+                "uk": "Виправлено збереження імені пристрою, додано функцію трансляції статусу, реалізовано скидання стану кнопки за допомогою таймерів, покращено регулярний вираз перевірки та додано команду повторного відкриття",
+                "zh-cn": "修复了设备名称保留，添加了状态广播功能，使用计时器实现了按钮状态重置，改进了验证器正则表达式，并添加了重新打开命令"
             },
             "0.2.0": {
                 "en": "Added device name and code properties, updated documentation, and improved protocol consistency",
-                "de": "Gerätename und Code-Eigenschaften hinzugefügt, Dokumentation aktualisiert und Protokollkonsistenz verbessert"
+                "de": "Gerätename und Code-Eigenschaften hinzugefügt, Dokumentation aktualisiert und Protokollkonsistenz verbessert",
+                "ru": "Добавлены свойства имени и кода устройства, обновлена ​​документация и улучшена согласованность протокола.",
+                "pt": "Adicionadas propriedades de nome e código do dispositivo, documentação atualizada e consistência de protocolo aprimorada",
+                "nl": "Apparaatnaam en code-eigenschappen toegevoegd, bijgewerkte documentatie en verbeterde protocolconsistentie",
+                "fr": "Ajout du nom de l'appareil et des propriétés du code, documentation mise à jour et cohérence améliorée du protocole",
+                "it": "Aggiunti nome del dispositivo e proprietà del codice, documentazione aggiornata e migliore coerenza del protocollo",
+                "es": "Se agregaron propiedades de código y nombre de dispositivo, documentación actualizada y coherencia de protocolo mejorada.",
+                "pl": "Dodano nazwę urządzenia i właściwości kodu, zaktualizowano dokumentację i poprawiono spójność protokołu",
+                "uk": "Додано назву пристрою та властивості коду, оновлену документацію та покращено узгодженість протоколу",
+                "zh-cn": "添加了设备名称和代码属性、更新了文档并改进了协议一致性"
             },
             "0.1.8": {
                 "en": "Added remote pairing support, improved command handling, refined moving state logic, removed extra languages, and fixed DuoFern command structure with 4-byte commands",
-                "de": "Remote-Pairing-Unterstützung hinzugefügt, Befehlsbehandlung verbessert, Logik für Bewegungsstatus verfeinert, zusätzliche Sprachen entfernt und DuoFern-Befehlsstruktur mit 4-Byte-Befehlen korrigiert"
+                "de": "Remote-Pairing-Unterstützung hinzugefügt, Befehlsbehandlung verbessert, Logik für Bewegungsstatus verfeinert, zusätzliche Sprachen entfernt und DuoFern-Befehlsstruktur mit 4-Byte-Befehlen korrigiert",
+                "ru": "Добавлена ​​поддержка удаленного сопряжения, улучшена обработка команд, усовершенствована логика перемещения состояний, удалены дополнительные языки и исправлена ​​структура команд DuoFern с 4-байтовыми командами.",
+                "pt": "Adicionado suporte de emparelhamento remoto, manipulação de comandos aprimorada, lógica de estado móvel refinada, idiomas extras removidos e estrutura de comando DuoFern fixa com comandos de 4 bytes",
+                "nl": "Ondersteuning voor koppeling op afstand toegevoegd, verbeterde opdrachtafhandeling, verfijnde logica voor bewegende toestanden, extra talen verwijderd en vaste DuoFern-opdrachtstructuur met opdrachten van 4 bytes",
+                "fr": "Ajout de la prise en charge du couplage à distance, gestion améliorée des commandes, logique d'état mobile raffinée, suppression de langues supplémentaires et structure de commande DuoFern corrigée avec des commandes de 4 octets",
+                "it": "Aggiunto supporto per l'accoppiamento remoto, migliore gestione dei comandi, logica dello stato mobile perfezionata, lingue aggiuntive rimosse e struttura dei comandi DuoFern fissa con comandi a 4 byte",
+                "es": "Se agregó soporte de emparejamiento remoto, manejo de comandos mejorado, lógica de estado de movimiento refinada, idiomas adicionales eliminados y estructura de comandos DuoFern fija con comandos de 4 bytes.",
+                "pl": "Dodano obsługę zdalnego parowania, ulepszoną obsługę poleceń, udoskonaloną logikę stanu ruchu, usunięto dodatkowe języki i poprawioną strukturę poleceń DuoFern z poleceniami 4-bajtowymi",
+                "uk": "Додано підтримку дистанційного з’єднання, покращено обробку команд, вдосконалено логіку стану переміщення, видалено додаткові мови та виправлено структуру команд DuoFern із 4-байтовими командами",
+                "zh-cn": "添加了远程配对支持，改进了命令处理，完善了移动状态逻辑，删除了额外的语言，并使用 4 字节命令修复了 DuoFern 命令结构"
             },
             "0.0.17": {
                 "en": "Initial releases with command buttons, position control, debug logging, fixed adapter startup, improved admin UI configuration, and comprehensive protocol implementation",
-                "de": "Erste Versionen mit Befehls-Schaltflächen, Positionssteuerung, Debug-Protokollierung, korrigiertem Adapter-Start, verbesserter Admin-UI-Konfiguration und umfassender Protokollimplementierung"
+                "de": "Erste Versionen mit Befehls-Schaltflächen, Positionssteuerung, Debug-Protokollierung, korrigiertem Adapter-Start, verbesserter Admin-UI-Konfiguration und umfassender Protokollimplementierung",
+                "ru": "Первоначальные выпуски с командными кнопками, контролем положения, журналированием отладки, фиксированным запуском адаптера, улучшенной конфигурацией пользовательского интерфейса администратора и комплексной реализацией протокола.",
+                "pt": "Versões iniciais com botões de comando, controle de posição, registro de depuração, inicialização fixa do adaptador, configuração aprimorada da UI administrativa e implementação abrangente de protocolo",
+                "nl": "Eerste releases met opdrachtknoppen, positiecontrole, logboekregistratie voor foutopsporing, opstarten van vaste adapters, verbeterde configuratie van de beheerdersinterface en uitgebreide protocolimplementatie",
+                "fr": "Versions initiales avec boutons de commande, contrôle de position, journalisation du débogage, démarrage fixe de l'adaptateur, configuration améliorée de l'interface utilisateur d'administration et mise en œuvre complète du protocole",
+                "it": "Versioni iniziali con pulsanti di comando, controllo della posizione, registrazione del debug, avvio corretto dell'adattatore, configurazione dell'interfaccia utente di amministrazione migliorata e implementazione completa del protocollo",
+                "es": "Lanzamientos iniciales con botones de comando, control de posición, registro de depuración, inicio fijo del adaptador, configuración mejorada de la interfaz de usuario de administración e implementación integral del protocolo.",
+                "pl": "Pierwsze wersje z przyciskami poleceń, kontrolą położenia, rejestrowaniem debugowania, poprawionym uruchamianiem adaptera, ulepszoną konfiguracją interfejsu administratora i kompleksową implementacją protokołu",
+                "uk": "Початкові випуски з командними кнопками, керуванням положенням, журналом налагодження, фіксованим запуском адаптера, покращеною конфігурацією інтерфейсу користувача адміністратора та комплексною реалізацією протоколу",
+                "zh-cn": "初始版本包含命令按钮、位置控制、调试日志记录、固定适配器启动、改进的管理 UI 配置和全面的协议实施"
             }
         },
         "titleLang": {
             "en": "DuoFern",
-            "de": "DuoFern"
+            "de": "DuoFern",
+            "ru": "ДуоПапоротник",
+            "pt": "DuoFern",
+            "nl": "DuoFern",
+            "fr": "DuoFern",
+            "it": "DuoFern",
+            "es": "dúohelecho",
+            "pl": "DuoFern",
+            "uk": "ДуоПапороть",
+            "zh-cn": "多芬"
         },
         "desc": {
             "en": "Connect Rademacher DuoFern devices via DuoFern USB Stick",
-            "de": "Rademacher DuoFern Geräte über DuoFern USB Stick verbinden"
+            "de": "Rademacher DuoFern Geräte über DuoFern USB Stick verbinden",
+            "ru": "Подключайте устройства Rademacher DuoFern через USB-накопитель DuoFern",
+            "pt": "Conecte dispositivos Rademacher DuoFern via DuoFern USB Stick",
+            "nl": "Sluit Rademacher DuoFern-apparaten aan via DuoFern USB-stick",
+            "fr": "Connectez les appareils Rademacher DuoFern via la clé USB DuoFern",
+            "it": "Collega i dispositivi Rademacher DuoFern tramite la chiavetta USB DuoFern",
+            "es": "Conecte dispositivos Rademacher DuoFern a través de una memoria USB DuoFern",
+            "pl": "Podłącz urządzenia Rademacher DuoFern za pomocą pamięci USB DuoFern",
+            "uk": "Підключайте пристрої Rademacher DuoFern через USB-накопичувач DuoFern",
+            "zh-cn": "通过 DuoFern USB 棒连接 Rademacher DuoFern 设备"
         },
-        "authors": ["glaessep <p.glaesser@hotmail.de>"],
-        "keywords": ["rademacher", "duofern"],
+        "authors": [
+            "Patrick Gläßer"
+        ],
+        "keywords": [
+            "rademacher",
+            "duofern"
+        ],
         "licenseInformation": {
             "type": "free",
             "license": "MIT"
@@ -68,7 +154,7 @@
         ],
         "globalDependencies": [
             {
-                "admin": ">=7.0.23"
+                "admin": ">=7.6.17"
             }
         ]
     },

@@ -1,0 +1,7 @@
+{
+    "DuoFern Stick Code (6 hex digits, e.g. 6Fxxxx)": "DuoFern 条码（6 个十六进制数字，例如 6Fxxxx）",
+    "Serial Port": "串口",
+    "Serial Port Help": "串行端口的路径（例如 /dev/serial/by-id/usb-Rademacher_DuoFern_USB-Stick_WR03XXXX-if00-port0 或 COM1）。在 Linux 上，为了稳定性，强烈建议使用 /dev/serial/by-id/...。",
+    "Stick Code Help": "操纵杆的 6 位十六进制代码。必须从6F开始。最后 4 位数字可以自由选择（例如 6F1234）。",
+    "duofern adapter settings": "duofern 的适配器设置"
+}

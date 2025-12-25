@@ -1,0 +1,7 @@
+{
+    "DuoFern Stick Code (6 hex digits, e.g. 6Fxxxx)": "DuoFern Stick Code (6 hexadecimale cijfers, bijv. 6Fxxxx)",
+    "Serial Port": "Seriële poort",
+    "Serial Port Help": "Pad naar de seriële poort (bijvoorbeeld /dev/serial/by-id/usb-Rademacher_DuoFern_USB-Stick_WR03XXXX-if00-port0 of COM1). Op Linux wordt /dev/serial/by-id/... ten zeerste aanbevolen voor de stabiliteit.",
+    "Stick Code Help": "De 6-cijferige hexadecimale code voor de stick. Moet beginnen met 6F. De laatste 4 cijfers zijn vrij te kiezen (bijvoorbeeld 6F1234).",
+    "duofern adapter settings": "Adapterinstellingen voor duofern"
+}
