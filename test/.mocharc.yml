@@ -2,7 +2,7 @@
 
 # Use tsx for TypeScript support
 node-option:
-    - 'import=tsx'
+  - 'import=tsx'
 
 # Timeout settings (integration tests may take longer)
 timeout: 60000

@@ -31,7 +31,7 @@ Enter the 6-digit hexadecimal code of your DuoFern stick:
 ## Supported Devices
 
 - **Blinds/Roller Shutters**: Basic control (up, down, stop, position, other commands may work, but untested)
-    - _Note: Currently, this adapter is only tested with blinds/roller shutters._
+  - _Note: Currently, this adapter is only tested with blinds/roller shutters._
 
 ## Usage
 

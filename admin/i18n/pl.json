@@ -1,7 +1,7 @@
 {
-    "DuoFern Stick Code (6 hex digits, e.g. 6Fxxxx)": "Kod DuoFern Stick (6 cyfr szesnastkowych, np. 6Fxxxx)",
-    "Serial Port": "Port szeregowy",
-    "Serial Port Help": "Ścieżka do portu szeregowego (np. /dev/serial/by-id/usb-Rademacher_DuoFern_USB-Stick_WR03XXXX-if00-port0 lub COM1). W systemie Linux zdecydowanie zaleca się użycie /dev/serial/by-id/... ze względu na stabilność.",
-    "Stick Code Help": "6-cyfrowy kod szesnastkowy drążka. Trzeba zacząć od 6F. Ostatnie 4 cyfry można dowolnie wybrać (np. 6F1234).",
-    "duofern adapter settings": "Ustawienia adaptera dla duofern"
+  "DuoFern Stick Code (6 hex digits, e.g. 6Fxxxx)": "Kod DuoFern Stick (6 cyfr szesnastkowych, np. 6Fxxxx)",
+  "Serial Port": "Port szeregowy",
+  "Serial Port Help": "Ścieżka do portu szeregowego (np. /dev/serial/by-id/usb-Rademacher_DuoFern_USB-Stick_WR03XXXX-if00-port0 lub COM1). W systemie Linux zdecydowanie zaleca się użycie /dev/serial/by-id/... ze względu na stabilność.",
+  "Stick Code Help": "6-cyfrowy kod szesnastkowy drążka. Trzeba zacząć od 6F. Ostatnie 4 cyfry można dowolnie wybrać (np. 6F1234).",
+  "duofern adapter settings": "Ustawienia adaptera dla duofern"
 }

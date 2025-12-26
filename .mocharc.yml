@@ -2,15 +2,15 @@
 
 # Use tsx for TypeScript support (handles both TS and JS)
 node-option:
-    - 'import=tsx'
+  - 'import=tsx'
 
 # Test files pattern - only src/ unit tests by default
 spec:
-    - 'src/**/*.test.ts'
+  - 'src/**/*.test.ts'
 
 # Watch files for changes
 watch-files:
-    - 'src/**/*.ts'
+  - 'src/**/*.ts'
 
 # Timeout settings
 timeout: 5000

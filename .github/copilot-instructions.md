@@ -9,18 +9,18 @@ This is an ioBroker adapter for Rademacher DuoFern devices, communicating via a 
 - **Adapter Layer** (`src/main.ts`): Extends `@iobroker/adapter-core`. Manages the adapter lifecycle, configuration, and maps DuoFern messages to ioBroker states.
 - **Hardware Layer** (`src/duofern/stick.ts`): Manages the serial connection to the DuoFern stick. Handles buffering, queueing, and basic protocol flow (ACKs).
 - **Protocol Layer**:
-    - `src/duofern/protocol.ts`: Defines command constants and frame builders. All device commands are 4-byte structures (8 hex chars) consisting of: prefix (07) + sub-command + param1 + param2. Commands are wrapped in 22-byte frames with proper padding.
-    - `src/duofern/parser.ts`: Parses incoming hex strings into usable objects.
+  - `src/duofern/protocol.ts`: Defines command constants and frame builders. All device commands are 4-byte structures (8 hex chars) consisting of: prefix (07) + sub-command + param1 + param2. Commands are wrapped in 22-byte frames with proper padding.
+  - `src/duofern/parser.ts`: Parses incoming hex strings into usable objects.
 - **Testing** (`test/protocol.test.ts`): Comprehensive unit tests validating all command formats against captured protocol traffic. Ensures commands generate correct 22-byte frames.
 
 ## Key Conventions
 
 - **Logging**:
-    - In `DuoFernAdapter`: Use `this.log.info()`, `this.log.error()`, etc.
-    - In `DuoFernStick`: Emit `log` events (`this.emit('log', level, msg)`).
+  - In `DuoFernAdapter`: Use `this.log.info()`, `this.log.error()`, etc.
+  - In `DuoFernStick`: Emit `log` events (`this.emit('log', level, msg)`).
 - **State Management**:
-    - Use `this.setState()` or `this.setStateAsync()` to update ioBroker states.
-    - Device IDs are typically the 6-digit hex DuoFern code.
+  - Use `this.setState()` or `this.setStateAsync()` to update ioBroker states.
+  - Device IDs are typically the 6-digit hex DuoFern code.
 
 ## Configuration
 

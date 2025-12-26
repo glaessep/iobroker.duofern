@@ -1,32 +1,32 @@
 {
-    "i18n": true,
-    "type": "panel",
-    "items": {
-        "port": {
-            "type": "text",
-            "label": "Serial Port",
-            "help": "Serial Port Help",
-            "xs": 12,
-            "sm": 12,
-            "md": 12,
-            "lg": 6,
-            "xl": 6,
-            "validator": "!!data.port && data.port.trim().length > 0",
-            "validatorErrorText": "Serial port is required",
-            "validatorNoSaveOnError": true
-        },
-        "code": {
-            "type": "text",
-            "label": "DuoFern Stick Code (6 hex digits, e.g. 6Fxxxx)",
-            "help": "Stick Code Help",
-            "xs": 12,
-            "sm": 12,
-            "md": 12,
-            "lg": 6,
-            "xl": 6,
-            "validator": "data.code != null && /^6[Ff][0-9A-Fa-f]{4}$/.test(data.code)",
-            "validatorErrorText": "Must be exactly 6 hex digits starting with 6F (e.g., 6F1A2B)",
-            "validatorNoSaveOnError": true
-        }
+  "i18n": true,
+  "type": "panel",
+  "items": {
+    "port": {
+      "type": "text",
+      "label": "Serial Port",
+      "help": "Serial Port Help",
+      "xs": 12,
+      "sm": 12,
+      "md": 12,
+      "lg": 6,
+      "xl": 6,
+      "validator": "!!data.port && data.port.trim().length > 0",
+      "validatorErrorText": "Serial port is required",
+      "validatorNoSaveOnError": true
+    },
+    "code": {
+      "type": "text",
+      "label": "DuoFern Stick Code (6 hex digits, e.g. 6Fxxxx)",
+      "help": "Stick Code Help",
+      "xs": 12,
+      "sm": 12,
+      "md": 12,
+      "lg": 6,
+      "xl": 6,
+      "validator": "data.code != null && /^6[Ff][0-9A-Fa-f]{4}$/.test(data.code)",
+      "validatorErrorText": "Must be exactly 6 hex digits starting with 6F (e.g., 6F1A2B)",
+      "validatorNoSaveOnError": true
     }
+  }
 }

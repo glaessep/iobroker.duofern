@@ -1,7 +1,7 @@
 {
-    "DuoFern Stick Code (6 hex digits, e.g. 6Fxxxx)": "Code Stick DuoFern (6 chiffres hexadécimaux, par exemple 6Fxxxx)",
-    "Serial Port": "Port série",
-    "Serial Port Help": "Chemin d'accès au port série (par exemple /dev/serial/by-id/usb-Rademacher_DuoFern_USB-Stick_WR03XXXX-if00-port0 ou COM1). Sous Linux, /dev/serial/by-id/... est fortement recommandé pour la stabilité.",
-    "Stick Code Help": "Le code hexadécimal à 6 chiffres du bâton. Doit commencer par 6F. Les 4 derniers chiffres peuvent être choisis librement (par exemple 6F1234).",
-    "duofern adapter settings": "Paramètres de l'adaptateur pour Duofern"
+  "DuoFern Stick Code (6 hex digits, e.g. 6Fxxxx)": "Code Stick DuoFern (6 chiffres hexadécimaux, par exemple 6Fxxxx)",
+  "Serial Port": "Port série",
+  "Serial Port Help": "Chemin d'accès au port série (par exemple /dev/serial/by-id/usb-Rademacher_DuoFern_USB-Stick_WR03XXXX-if00-port0 ou COM1). Sous Linux, /dev/serial/by-id/... est fortement recommandé pour la stabilité.",
+  "Stick Code Help": "Le code hexadécimal à 6 chiffres du bâton. Doit commencer par 6F. Les 4 derniers chiffres peuvent être choisis librement (par exemple 6F1234).",
+  "duofern adapter settings": "Paramètres de l'adaptateur pour Duofern"
 }

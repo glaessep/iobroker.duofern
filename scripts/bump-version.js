@@ -7,22 +7,22 @@ const args = process.argv.slice(2);
 const versionType = args[0] || 'patch'; // patch, minor, major, or explicit version like 1.2.3
 
 function bumpVersion(version, type) {
-    const parts = version.split('.').map(Number);
+  const parts = version.split('.').map(Number);
 
-    if (/^\d+\.\d+\.\d+$/.test(type)) {
-        // Explicit version provided
-        return type;
-    }
+  if (/^\d+\.\d+\.\d+$/.test(type)) {
+    // Explicit version provided
+    return type;
+  }
 
-    switch (type) {
-        case 'major':
-            return `${parts[0] + 1}.0.0`;
-        case 'minor':
-            return `${parts[0]}.${parts[1] + 1}.0`;
-        case 'patch':
-        default:
-            return `${parts[0]}.${parts[1]}.${parts[2] + 1}`;
-    }
+  switch (type) {
+    case 'major':
+      return `${parts[0] + 1}.0.0`;
+    case 'minor':
+      return `${parts[0]}.${parts[1] + 1}.0`;
+    case 'patch':
+    default:
+      return `${parts[0]}.${parts[1]}.${parts[2] + 1}`;
+  }
 }
 
 // Read package.json

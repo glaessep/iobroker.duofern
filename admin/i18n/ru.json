@@ -1,7 +1,7 @@
 {
-    "DuoFern Stick Code (6 hex digits, e.g. 6Fxxxx)": "Код DuoFern Stick (6 шестнадцатеричных цифр, например 6Fxxxx)",
-    "Serial Port": "Последовательный порт",
-    "Serial Port Help": "Путь к последовательному порту (например, /dev/serial/by-id/usb-Rademacher_DuoFern_USB-Stick_WR03XXXX-if00-port0 или COM1). В Linux для стабильности настоятельно рекомендуется /dev/serial/by-id/....",
-    "Stick Code Help": "Шестизначный шестнадцатеричный код флешки. Должен начинаться с 6F. Последние 4 цифры можно выбрать произвольно (например, 6F1234).",
-    "duofern adapter settings": "Настройки адаптера для дуферна"
+  "DuoFern Stick Code (6 hex digits, e.g. 6Fxxxx)": "Код DuoFern Stick (6 шестнадцатеричных цифр, например 6Fxxxx)",
+  "Serial Port": "Последовательный порт",
+  "Serial Port Help": "Путь к последовательному порту (например, /dev/serial/by-id/usb-Rademacher_DuoFern_USB-Stick_WR03XXXX-if00-port0 или COM1). В Linux для стабильности настоятельно рекомендуется /dev/serial/by-id/....",
+  "Stick Code Help": "Шестизначный шестнадцатеричный код флешки. Должен начинаться с 6F. Последние 4 цифры можно выбрать произвольно (например, 6F1234).",
+  "duofern adapter settings": "Настройки адаптера для дуферна"
 }

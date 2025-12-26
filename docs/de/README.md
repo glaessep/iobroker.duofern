@@ -31,7 +31,7 @@ Gib den 6-stelligen Hexadezimalcode deines DuoFern Sticks ein:
 ## Unterstützte Geräte
 
 - **Rollläden/Markisen**: Grundsteuerung (hoch, runter, stopp, Position, andere Befehle funktionieren möglicherweise, sind aber ungetestet)
-    - _Hinweis: Dieser Adapter wurde bisher nur mit Rollläden/Jalousien getestet._
+  - _Hinweis: Dieser Adapter wurde bisher nur mit Rollläden/Jalousien getestet._
 
 ## Verwendung
 

@@ -17,30 +17,30 @@
  *
  */
 export const Protocol = {
-    // Init sequences
-    duoInit1: '01000000000000000000000000000000000000000000',
-    duoInit2: '0E000000000000000000000000000000000000000000',
-    duoSetDongle: '0Azzzzzz000100000000000000000000000000000000', // zzzzzz = dongle serial
-    duoInit3: '14140000000000000000000000000000000000000000',
-    duoSetPairs: '03nnyyyyyy0000000000000000000000000000000000', // nn = counter, yyyyyy = device code
-    duoInitEnd: '10010000000000000000000000000000000000000000',
+  // Init sequences
+  duoInit1: '01000000000000000000000000000000000000000000',
+  duoInit2: '0E000000000000000000000000000000000000000000',
+  duoSetDongle: '0Azzzzzz000100000000000000000000000000000000', // zzzzzz = dongle serial
+  duoInit3: '14140000000000000000000000000000000000000000',
+  duoSetPairs: '03nnyyyyyy0000000000000000000000000000000000', // nn = counter, yyyyyy = device code
+  duoInitEnd: '10010000000000000000000000000000000000000000',
 
-    // Basic commands
-    duoACK: '81000000000000000000000000000000000000000000',
-    duoStatusRequest: '0DFF0F400000000000000000000000000000FFFFFF01',
+  // Basic commands
+  duoACK: '81000000000000000000000000000000000000000000',
+  duoStatusRequest: '0DFF0F400000000000000000000000000000FFFFFF01',
 
-    // Pairing
-    duoStartPair: '04000000000000000000000000000000000000000000',
-    duoStopPair: '05000000000000000000000000000000000000000000',
-    duoStartUnpair: '07000000000000000000000000000000000000000000',
-    duoStopUnpair: '08000000000000000000000000000000000000000000',
-    duoRemotePair: '0D0106010000000000000000000000000000yyyyyy00', // yyyyyy = device code
+  // Pairing
+  duoStartPair: '04000000000000000000000000000000000000000000',
+  duoStopPair: '05000000000000000000000000000000000000000000',
+  duoStartUnpair: '07000000000000000000000000000000000000000000',
+  duoStopUnpair: '08000000000000000000000000000000000000000000',
+  duoRemotePair: '0D0106010000000000000000000000000000yyyyyy00', // yyyyyy = device code
 
-    // Responses / Patterns
-    ackPattern: /^81.{42}$/, // ACK messages
-    pairPaired: /^0602.{40}$/,
-    pairUnpaired: /^0603.{40}$/,
-    statusFrame: /^(06|0F).{42}$/, // Status messages
+  // Responses / Patterns
+  ackPattern: /^81.{42}$/, // ACK messages
+  pairPaired: /^0602.{40}$/,
+  pairUnpaired: /^0603.{40}$/,
+  statusFrame: /^(06|0F).{42}$/, // Status messages
 };
 
 /**
@@ -55,47 +55,47 @@ export const Protocol = {
  *
  */
 export const Commands = {
-    // Basic Movement - All commands are 4 bytes: prefix + cmd + param1 + param2
-    up: '07010000', // 4 bytes: 07 01 00 00
-    stop: '07020000', // 4 bytes: 07 02 00 00
-    down: '07030000', // 4 bytes: 07 03 00 00
-    position: '070700nn', // 4 bytes: 07 07 00 nn (nn = position 00-64 hex = 0-100%)
-    toggle: '071A0000', // 4 bytes: 07 1A 00 00
-    remotePair: '06010000', // 4 bytes: 06 01 00 00
+  // Basic Movement - All commands are 4 bytes: prefix + cmd + param1 + param2
+  up: '07010000', // 4 bytes: 07 01 00 00
+  stop: '07020000', // 4 bytes: 07 02 00 00
+  down: '07030000', // 4 bytes: 07 03 00 00
+  position: '070700nn', // 4 bytes: 07 07 00 nn (nn = position 00-64 hex = 0-100%)
+  toggle: '071A0000', // 4 bytes: 07 1A 00 00
+  remotePair: '06010000', // 4 bytes: 06 01 00 00
 
-    // Status/Query - Special command using channel FF, no stick code, suffix 01
-    statusRequest: '0F400000', // 4 bytes: 0F 40 00 00 (use with channel=FF, suffix=01, no stickCode)
+  // Status/Query - Special command using channel FF, no stick code, suffix 01
+  statusRequest: '0F400000', // 4 bytes: 0F 40 00 00 (use with channel=FF, suffix=01, no stickCode)
 
-    // Modes (On/Off) - All 4 bytes
-    sunModeOn: '070801FF',
-    sunModeOff: '070A0100',
-    windModeOn: '070D01FF',
-    windModeOff: '070E0100',
-    rainModeOn: '071101FF',
-    rainModeOff: '07120100',
+  // Modes (On/Off) - All 4 bytes
+  sunModeOn: '070801FF',
+  sunModeOff: '070A0100',
+  windModeOn: '070D01FF',
+  windModeOff: '070E0100',
+  rainModeOn: '071101FF',
+  rainModeOff: '07120100',
 
-    // Automatics (On/Off) - All 4 bytes
-    sunAutomaticOn: '080100FD',
-    sunAutomaticOff: '080100FE',
-    timeAutomaticOn: '080400FD',
-    timeAutomaticOff: '080400FE',
-    dawnAutomaticOn: '080900FD',
-    dawnAutomaticOff: '080900FE',
-    duskAutomaticOn: '080500FD',
-    duskAutomaticOff: '080500FE',
-    manualModeOn: '080600FD',
-    manualModeOff: '080600FE',
-    windAutomaticOn: '080700FD',
-    windAutomaticOff: '080700FE',
-    rainAutomaticOn: '080800FD',
-    rainAutomaticOff: '080800FE',
+  // Automatics (On/Off) - All 4 bytes
+  sunAutomaticOn: '080100FD',
+  sunAutomaticOff: '080100FE',
+  timeAutomaticOn: '080400FD',
+  timeAutomaticOff: '080400FE',
+  dawnAutomaticOn: '080900FD',
+  dawnAutomaticOff: '080900FE',
+  duskAutomaticOn: '080500FD',
+  duskAutomaticOff: '080500FE',
+  manualModeOn: '080600FD',
+  manualModeOff: '080600FE',
+  windAutomaticOn: '080700FD',
+  windAutomaticOff: '080700FE',
+  rainAutomaticOn: '080800FD',
+  rainAutomaticOff: '080800FE',
 
-    // Configuration / Positions - All 4 bytes
-    sunPosition: '080100nn', // 4 bytes: 08 01 00 nn
-    ventilatingPosition: '080200nn', // 4 bytes: 08 02 00 nn
-    ventilatingModeOn: '080200FD',
-    ventilatingModeOff: '080200FE',
-    slatPosition: '071B00nn', // 4 bytes: 07 1B 00 nn (nn = position 00-64 hex = 0-100%)
+  // Configuration / Positions - All 4 bytes
+  sunPosition: '080100nn', // 4 bytes: 08 01 00 nn
+  ventilatingPosition: '080200nn', // 4 bytes: 08 02 00 nn
+  ventilatingModeOn: '080200FD',
+  ventilatingModeOff: '080200FE',
+  slatPosition: '071B00nn', // 4 bytes: 07 1B 00 nn (nn = position 00-64 hex = 0-100%)
 };
 
 /**
@@ -108,10 +108,10 @@ export const Commands = {
  * @throws {Error} If serial is not exactly 6 hex digits
  */
 export function buildSetDongle(serial: string): string {
-    if (!/^[0-9A-F]{6}$/i.test(serial)) {
-        throw new Error('Invalid dongle serial. Must be 6 hex digits.');
-    }
-    return Protocol.duoSetDongle.replace('zzzzzz', serial.toUpperCase());
+  if (!/^[0-9A-F]{6}$/i.test(serial)) {
+    throw new Error('Invalid dongle serial. Must be 6 hex digits.');
+  }
+  return Protocol.duoSetDongle.replace('zzzzzz', serial.toUpperCase());
 }
 
 /**
@@ -125,9 +125,9 @@ export function buildSetDongle(serial: string): string {
  * @returns 44-character hex frame ready to send
  */
 export function buildSetPairs(counter: number, deviceCode: string): string {
-    const nn = counter.toString(16).padStart(2, '0').toUpperCase();
-    const yyyyyy = deviceCode.toUpperCase();
-    return Protocol.duoSetPairs.replace('nn', nn).replace('yyyyyy', yyyyyy);
+  const nn = counter.toString(16).padStart(2, '0').toUpperCase();
+  const yyyyyy = deviceCode.toUpperCase();
+  return Protocol.duoSetPairs.replace('nn', nn).replace('yyyyyy', yyyyyy);
 }
 
 /**
@@ -137,7 +137,7 @@ export function buildSetPairs(counter: number, deviceCode: string): string {
  * @returns 44-character hex frame ready to send
  */
 export function buildRemotePair(deviceCode: string): string {
-    return Protocol.duoRemotePair.replace('yyyyyy', deviceCode.toUpperCase());
+  return Protocol.duoRemotePair.replace('yyyyyy', deviceCode.toUpperCase());
 }
 
 /**
@@ -164,55 +164,55 @@ export function buildRemotePair(deviceCode: string): string {
  * template placeholders only (e.g., position value in "070700nn").
  */
 export function buildCommand(
-    template: string,
-    replacements: Record<string, string | number>,
-    options?: { deviceCode?: string; stickCode?: string; channel?: string; suffix?: string },
+  template: string,
+  replacements: Record<string, string | number>,
+  options?: { deviceCode?: string; stickCode?: string; channel?: string; suffix?: string },
 ): string {
-    let cmd = template;
+  let cmd = template;
 
-    // Replace placeholders in the command body (e.g., tt/nn).
-    for (const [key, value] of Object.entries(replacements)) {
-        let hexVal = '';
-        if (typeof value === 'number') {
-            hexVal = value.toString(16).padStart(2, '0').toUpperCase();
-        } else {
-            hexVal = value.toUpperCase();
-        }
-        cmd = cmd.replace(key, hexVal);
+  // Replace placeholders in the command body (e.g., tt/nn).
+  for (const [key, value] of Object.entries(replacements)) {
+    let hexVal = '';
+    if (typeof value === 'number') {
+      hexVal = value.toString(16).padStart(2, '0').toUpperCase();
+    } else {
+      hexVal = value.toUpperCase();
     }
+    cmd = cmd.replace(key, hexVal);
+  }
 
-    // All commands are exactly 4 bytes (8 hex chars)
-    // Pad with 00 if needed to ensure 8 hex chars
-    if (cmd.length < 8) {
-        cmd = cmd.padEnd(8, '0');
-    }
-    const commandBody = cmd.substring(0, 8);
+  // All commands are exactly 4 bytes (8 hex chars)
+  // Pad with 00 if needed to ensure 8 hex chars
+  if (cmd.length < 8) {
+    cmd = cmd.padEnd(8, '0');
+  }
+  const commandBody = cmd.substring(0, 8);
 
-    // Frame structure: 0D + CH(1) + CMD(4) + PADDING(9) + STICK(3) + DEVICE(3) + SF(1) = 22 bytes
-    // 0D(2) + CH(2) + CMD(8) + PADDING(18) + STICK(6) + DEVICE(6) + SF(2) = 44 hex chars
-    const padding = '000000000000000000'; // 9 bytes = 18 hex chars
+  // Frame structure: 0D + CH(1) + CMD(4) + PADDING(9) + STICK(3) + DEVICE(3) + SF(1) = 22 bytes
+  // 0D(2) + CH(2) + CMD(8) + PADDING(18) + STICK(6) + DEVICE(6) + SF(2) = 44 hex chars
+  const padding = '000000000000000000'; // 9 bytes = 18 hex chars
 
-    // Wrap in full DuoFern frame if device code is provided
-    const deviceCode = options?.deviceCode || (replacements.yyyyyy as string | undefined);
-    const stickCode = options?.stickCode || (replacements.zzzzzz as string | undefined);
+  // Wrap in full DuoFern frame if device code is provided
+  const deviceCode = options?.deviceCode || (replacements.yyyyyy as string | undefined);
+  const stickCode = options?.stickCode || (replacements.zzzzzz as string | undefined);
 
-    if (deviceCode) {
-        const channel = (options?.channel || '01').toUpperCase();
-        const suffix = (options?.suffix || '00').toUpperCase();
-        const stick = stickCode ? stickCode.toUpperCase() : '000000'; // Use 000000 if no stick code (e.g., status requests)
+  if (deviceCode) {
+    const channel = (options?.channel || '01').toUpperCase();
+    const suffix = (options?.suffix || '00').toUpperCase();
+    const stick = stickCode ? stickCode.toUpperCase() : '000000'; // Use 000000 if no stick code (e.g., status requests)
 
-        return [
-            '0D', // Start byte (1)
-            channel, // Channel (1)
-            commandBody, // Command (4 bytes = 8 hex chars)
-            padding, // Padding (9 bytes = 18 hex chars)
-            stick, // Stick code (3) or 000000 for broadcast
-            deviceCode.toUpperCase(), // Device code (3)
-            suffix, // Suffix (1)
-        ].join(''); // Total: 22 bytes = 44 hex chars
-    }
+    return [
+      '0D', // Start byte (1)
+      channel, // Channel (1)
+      commandBody, // Command (4 bytes = 8 hex chars)
+      padding, // Padding (9 bytes = 18 hex chars)
+      stick, // Stick code (3) or 000000 for broadcast
+      deviceCode.toUpperCase(), // Device code (3)
+      suffix, // Suffix (1)
+    ].join(''); // Total: 22 bytes = 44 hex chars
+  }
 
-    return cmd;
+  return cmd;
 }
 
 /**
@@ -223,16 +223,16 @@ export function buildCommand(
  * @returns 44-character hex frame ready to send
  */
 export function buildStatusRequest(deviceCode: string): string {
-    return buildCommand(
-        Commands.statusRequest,
-        {},
-        {
-            deviceCode: deviceCode.toUpperCase(),
-            channel: 'FF',
-            suffix: '01',
-            // No stickCode = uses 000000
-        },
-    );
+  return buildCommand(
+    Commands.statusRequest,
+    {},
+    {
+      deviceCode: deviceCode.toUpperCase(),
+      channel: 'FF',
+      suffix: '01',
+      // No stickCode = uses 000000
+    },
+  );
 }
 
 /**
@@ -242,7 +242,7 @@ export function buildStatusRequest(deviceCode: string): string {
  * @returns 44-character hex frame ready to send
  */
 export function buildBroadcastStatusRequest(): string {
-    return buildStatusRequest('FFFFFF');
+  return buildStatusRequest('FFFFFF');
 }
 
 /**
@@ -256,11 +256,11 @@ export function buildBroadcastStatusRequest(): string {
  * @returns Array of two 44-character hex frames
  */
 export function buildRemotePairFrames(deviceCode: string, channel = '01'): string[] {
-    const dev = deviceCode.toUpperCase();
-    const chan = channel.toUpperCase();
-    // Build frames matching the Protocol.duoRemotePair structure:
-    // "0D" + channel + "060100" + 26 zero hex chars + deviceCode (6 hex) + suffix
-    // Total: 44 hex chars (22 bytes)
-    const frame = (suffix: string): string => `0D${chan}06010000000000000000000000000000${dev}${suffix}`;
-    return [frame('00'), frame('01')];
+  const dev = deviceCode.toUpperCase();
+  const chan = channel.toUpperCase();
+  // Build frames matching the Protocol.duoRemotePair structure:
+  // "0D" + channel + "060100" + 26 zero hex chars + deviceCode (6 hex) + suffix
+  // Total: 44 hex chars (22 bytes)
+  const frame = (suffix: string): string => `0D${chan}06010000000000000000000000000000${dev}${suffix}`;
+  return [frame('00'), frame('01')];
 }

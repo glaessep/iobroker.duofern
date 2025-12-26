@@ -1,15 +1,15 @@
 {
-    "extends": "@istanbuljs/nyc-config-typescript",
-    "all": true,
-    "check-coverage": true,
-    "statements": 95,
-    "branches": 80,
-    "functions": 100,
-    "reporter": ["text-summary", "html", "json-summary"],
-    "include": ["src/**/*.ts"],
-    "exclude": ["src/main.ts", "src/**/*.test.ts", "src/cli.ts", "**/*.d.ts", "build/**", "test/**"],
-    "extension": [".ts"],
-    "source-map": true,
-    "instrument": true,
-    "produce-source-map": true
+  "extends": "@istanbuljs/nyc-config-typescript",
+  "all": true,
+  "check-coverage": true,
+  "statements": 95,
+  "branches": 80,
+  "functions": 100,
+  "reporter": ["text-summary", "html", "json-summary"],
+  "include": ["src/**/*.ts"],
+  "exclude": ["src/main.ts", "src/**/*.test.ts", "src/cli.ts", "**/*.d.ts", "build/**", "test/**"],
+  "extension": [".ts"],
+  "source-map": true,
+  "instrument": true,
+  "produce-source-map": true
 }
